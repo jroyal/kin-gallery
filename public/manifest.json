@@ -1,0 +1,16 @@
+{
+  "name": "KinGallery",
+  "short_name": "KinGallery",
+  "description": "Ad-free family photo sharing",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#EFE7DB",
+  "theme_color": "#3B6F49",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

@@ -12,8 +12,31 @@
 - ✅ [2025-07-13T10:29:00Z] Created `Dockerfile` with Node 20 LTS, ffmpeg, and production build
 - ✅ [2025-07-13T10:30:00Z] Updated `package.json` with all required dependencies (Astro, Node adapter, TailwindCSS, SQLite, Sharp, Zod) and testing framework (Vitest, Playwright)
 
+## TASK 2 — Core Backend ✅ [2025-07-13T11:45:00Z]
+
+### Completed Items:
+- ✅ [2025-07-13T10:35:00Z] Implemented `lib/db.ts` with SQLite setup, migrations, and strict Zod schemas for all tables (users, children, media, comments, reactions)
+- ✅ [2025-07-13T10:50:00Z] Created `lib/media.ts` with Sharp image processing (thumb 200px, medium 800px) and ffmpeg video transcoding (H.264, CRF 23 for optimal quality/size)
+- ✅ [2025-07-13T11:10:00Z] Built `lib/auth.ts` with Cloudflare Access JWT simulation using `CF-Access-Jwt-Assertion` header, first user becomes admin
+- ✅ [2025-07-13T11:30:00Z] Created comprehensive API routes:
+  - `/api/health` - Docker health checks
+  - `/api/auth/me` - User authentication status  
+  - `/api/children` - Full CRUD for child management
+  - `/api/upload` - Media upload with processing
+  - `/api/media` - Media browsing with pagination
+  - `/api/comments` - Comment CRUD with user permissions
+  - `/api/reactions` - Heart reactions toggle
+  - `/api/admin/users` - User role management (admin only)
+- ✅ [2025-07-13T11:45:00Z] Implemented `service-worker.ts` with PWA offline support (media caching, request queuing, background sync)
+
+### Architecture Details:
+- **Database**: SQLite with WAL mode, foreign keys, comprehensive indexes for performance
+- **Media Processing**: Hash-based file organization `/media/{child}/{YYYY}/{MM}/{hash}.ext` with separate thumbs subdirectory
+- **Authentication**: Simulated Cloudflare Access JWT with dev fallback (`dev@example.com`), role-based permissions
+- **API Design**: RESTful endpoints with Zod validation, proper error handling, soft deletes throughout
+- **PWA Features**: Service worker caches last 50 media items, queues offline mutations, network-first for API, cache-first for media
+
 ### Next Tasks:
-- TASK 2: Core Backend (Database setup, media processing, auth, API routes, service worker)
 - TASK 3: Frontend Components (Albums grid, recents feed, slideshow modal, auth forms)
 - TASK 4: Testing & CI (Unit tests, E2E tests, Lighthouse integration)
 
