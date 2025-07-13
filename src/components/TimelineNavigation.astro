@@ -1,0 +1,90 @@
+---
+export interface Props {
+	currentMonth?: string;
+	availableMonths?: Array<{
+		label: string;
+		value: string;
+		count: number;
+	}>;
+	showYearJump?: boolean;
+}
+
+const { 
+	currentMonth = new Date().toISOString().slice(0, 7), // YYYY-MM format
+	availableMonths = [],
+	showYearJump = true 
+} = Astro.props;
+
+// Generate default months if none provided
+const defaultMonths = [
+	{ label: 'Jul', value: '2025-07', count: 28 },
+	{ label: 'Jun', value: '2025-06', count: 15 },
+	{ label: 'May', value: '2025-05', count: 22 },
+	{ label: 'Apr', value: '2025-04', count: 18 },
+	{ label: 'Mar', value: '2025-03', count: 31 }
+];
+
+const months = availableMonths.length > 0 ? availableMonths : defaultMonths;
+---
+
+<div class="sticky top-16 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-100">
+	<!-- Month Navigation -->
+	<div class="px-4 py-3">
+		<div class="flex items-center justify-between mb-3">
+			<!-- Current Month/Year -->
+			<h2 class="text-2xl font-heading font-bold text-gray-900">
+				{new Date(currentMonth + '-01').toLocaleDateString('en-US', { 
+					month: 'long', 
+					year: 'numeric' 
+				})}
+			</h2>
+			
+			<!-- Jump to Year Button -->
+			{showYearJump && (
+				<button 
+					class="text-sm font-medium text-forest hover:text-forest/80 transition-colors"
+					onclick="showYearJump()"
+				>
+					Jump to Year
+				</button>
+			)}
+		</div>
+		
+		<!-- Month Tabs -->
+		<div class="flex space-x-1 overflow-x-auto scrollbar-hide">
+			{months.map((month) => (
+				<a 
+					href={`/?month=${month.value}`}
+					class={`flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all ${
+						month.value === currentMonth
+							? 'bg-forest text-white shadow-sm'
+							: 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+					}`}
+				>
+					<span>{month.label}</span>
+					{month.count > 0 && (
+						<span class="ml-1 text-xs opacity-75">({month.count})</span>
+					)}
+				</a>
+			))}
+		</div>
+	</div>
+</div>
+
+<style>
+	.scrollbar-hide {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+	
+	.scrollbar-hide::-webkit-scrollbar {
+		display: none;
+	}
+</style>
+
+<script>
+	function showYearJump() {
+		// TODO: Implement year jump modal
+		console.log('Showing year jump...');
+	}
+</script>

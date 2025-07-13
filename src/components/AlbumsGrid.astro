@@ -1,0 +1,217 @@
+---
+import HeroPhoto from './HeroPhoto.astro';
+import MediaCard from './MediaCard.astro';
+import TimelineNavigation from './TimelineNavigation.astro';
+
+export interface Props {
+	currentMonth?: string;
+	heroMedia?: any;
+	childInfo?: {
+		name: string;
+		age?: string;
+	};
+	recentMedia?: any[];
+	mediaCount?: number;
+}
+
+const { 
+	currentMonth = new Date().toISOString().slice(0, 7),
+	heroMedia,
+	childInfo,
+	recentMedia = [],
+	mediaCount = 0
+} = Astro.props;
+
+// Mock data for demonstration
+const mockHeroMedia = heroMedia || {
+	id: 1,
+	filename: 'hero-photo.jpg',
+	type: 'photo',
+	width: 1200,
+	height: 900,
+	taken_at: '2025-07-10T14:30:00Z',
+	child_name: 'Amelia'
+};
+
+const mockChildInfo = childInfo || {
+	name: 'Amelia',
+	age: '1 yr 6 mos'
+};
+
+const mockRecentMedia = recentMedia.length > 0 ? recentMedia : [
+	{
+		id: 2,
+		filename: 'photo1.jpg',
+		type: 'photo',
+		width: 800,
+		height: 600,
+		taken_at: '2025-07-09T16:45:00Z'
+	},
+	{
+		id: 3,
+		filename: 'video1.mp4',
+		type: 'video',
+		width: 1920,
+		height: 1080,
+		taken_at: '2025-07-08T10:20:00Z'
+	},
+	{
+		id: 4,
+		filename: 'photo2.jpg',
+		type: 'photo',
+		width: 600,
+		height: 800,
+		taken_at: '2025-07-07T12:15:00Z'
+	},
+	{
+		id: 5,
+		filename: 'photo3.jpg',
+		type: 'photo',
+		width: 800,
+		height: 600,
+		taken_at: '2025-07-06T18:30:00Z'
+	},
+	{
+		id: 6,
+		filename: 'photo4.jpg',
+		type: 'photo',
+		width: 600,
+		height: 800,
+		taken_at: '2025-07-05T14:45:00Z'
+	},
+	{
+		id: 7,
+		filename: 'photo5.jpg',
+		type: 'photo',
+		width: 800,
+		height: 600,
+		taken_at: '2025-07-04T11:20:00Z'
+	}
+];
+---
+
+<div class="min-h-screen bg-parchment">
+	<!-- Timeline Navigation -->
+	<TimelineNavigation currentMonth={currentMonth} />
+	
+	<!-- Main Content -->
+	<div class="px-4 py-6 space-y-6">
+		<!-- Hero Photo Section -->
+		<section>
+			<HeroPhoto 
+				media={mockHeroMedia}
+				childInfo={mockChildInfo}
+				mediaCount={mediaCount || mockRecentMedia.length + 1}
+			/>
+		</section>
+
+		<!-- Recent Photos Grid -->
+		{mockRecentMedia.length > 0 && (
+			<section>
+				<div class="grid grid-cols-3 gap-1 sm:gap-2">
+					{mockRecentMedia.map((media) => (
+						<div class="aspect-square">
+							<MediaCard 
+								media={media}
+								size="thumb"
+								showDuration={media.type === 'video'}
+								className="rounded-lg"
+								onClick={`openMediaViewer(${media.id})`}
+							/>
+						</div>
+					))}
+				</div>
+			</section>
+		)}
+
+		<!-- Empty State -->
+		{mockRecentMedia.length === 0 && !heroMedia && (
+			<section class="text-center py-12">
+				<div class="max-w-sm mx-auto">
+					<div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+						<svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6l3-4 2.03 2.71L14 13l4 6z"/>
+						</svg>
+					</div>
+					<h3 class="text-lg font-heading font-semibold text-gray-900 mb-2">
+						No photos yet
+					</h3>
+					<p class="text-gray-600 mb-6">
+						Start by uploading your first family photos and videos.
+					</p>
+					<a 
+						href="/upload"
+						class="inline-flex items-center px-6 py-3 bg-forest text-white font-medium rounded-lg hover:bg-forest/90 transition-colors"
+					>
+						<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+						</svg>
+						Upload Photos
+					</a>
+				</div>
+			</section>
+		)}
+
+		<!-- Family Actions (PRD-focused) -->
+		<section class="pt-4">
+			<div class="grid grid-cols-2 gap-4">
+				<a 
+					href="/upload"
+					class="flex items-center justify-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all"
+				>
+					<svg class="w-6 h-6 text-forest mr-3" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+					</svg>
+					<span class="font-medium text-gray-900">Add Photos</span>
+				</a>
+				
+				<button 
+					onclick="startAirPlaySlideshow()"
+					class="flex items-center justify-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all"
+				>
+					<svg class="w-6 h-6 text-forest mr-3" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M21 3H3c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h5l-1 1v2h8v-2l-1-1h5c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM4 17V6h16v11H4z"/>
+						<circle cx="12" cy="12" r="2"/>
+					</svg>
+					<span class="font-medium text-gray-900">AirPlay</span>
+				</button>
+			</div>
+			
+			<!-- Child Selection for Organization -->
+			<div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+				<h3 class="font-medium text-gray-900 mb-3">Browse by Child</h3>
+				<div class="flex flex-wrap gap-2">
+					<button class="px-3 py-2 bg-forest text-white rounded-full text-sm font-medium">
+						All Children
+					</button>
+					<button class="px-3 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">
+						Amelia (1yr 6mo)
+					</button>
+					<button class="px-3 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">
+						Family Photos
+					</button>
+				</div>
+			</div>
+		</section>
+	</div>
+</div>
+
+<script>
+	function openMediaViewer(mediaId) {
+		// TODO: Implement media viewer
+		console.log('Opening media viewer for:', mediaId);
+	}
+	
+	function startAirPlaySlideshow() {
+		// PRD Requirement U-06: AirPlay slideshow support
+		if ('HTMLMediaElement' in window && 'webkitShowPlaybackTargetPicker' in HTMLMediaElement.prototype) {
+			// iOS AirPlay picker available
+			console.log('Starting AirPlay slideshow...');
+			// TODO: Implement slideshow with webkitShowPlaybackTargetPicker
+		} else {
+			// Fallback slideshow mode
+			console.log('Starting fullscreen slideshow...');
+			// TODO: Implement fullscreen slideshow with auto-advance
+		}
+	}
+</script>

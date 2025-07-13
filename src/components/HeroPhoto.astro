@@ -1,0 +1,97 @@
+---
+import MediaCard from './MediaCard.astro';
+
+export interface Props {
+	media: {
+		id: number;
+		filename: string;
+		type: 'photo' | 'video';
+		width?: number;
+		height?: number;
+		taken_at: string;
+		child_name?: string;
+	};
+	childInfo?: {
+		name: string;
+		age?: string;
+	};
+	mediaCount?: number;
+}
+
+const { media, childInfo, mediaCount } = Astro.props;
+
+// Calculate age display
+const getAgeFromDate = (birthdate: string, photoDate: string) => {
+	const birth = new Date(birthdate);
+	const photo = new Date(photoDate);
+	const months = (photo.getFullYear() - birth.getFullYear()) * 12 + (photo.getMonth() - birth.getMonth());
+	
+	if (months < 12) {
+		return `${months} mos`;
+	} else {
+		const years = Math.floor(months / 12);
+		const remainingMonths = months % 12;
+		return remainingMonths > 0 ? `${years} yr ${remainingMonths} mos` : `${years} yr`;
+	}
+};
+---
+
+<div class="relative">
+	<!-- Hero Image -->
+	<div class="aspect-[4/3] rounded-lg overflow-hidden">
+		<MediaCard 
+			media={media}
+			size="hero"
+			className="rounded-lg"
+			onClick="openMediaViewer()"
+		/>
+	</div>
+
+	<!-- Overlay Information -->
+	<div class="absolute bottom-0 left-0 right-0 p-4">
+		<div class="bg-gradient-to-t from-black/60 to-transparent rounded-b-lg p-4 -m-4">
+			{childInfo && (
+				<div class="text-white">
+					<h2 class="text-xl font-heading font-semibold mb-1">
+						{childInfo.name}
+						{childInfo.age && (
+							<span class="text-sm font-normal opacity-90">, {childInfo.age}</span>
+						)}
+					</h2>
+				</div>
+			)}
+			
+			{mediaCount && (
+				<div class="text-white/80 text-sm mt-2">
+					{mediaCount} item{mediaCount !== 1 ? 's' : ''}
+				</div>
+			)}
+		</div>
+	</div>
+
+	<!-- Play button for videos -->
+	{media.type === 'video' && (
+		<div class="absolute inset-0 flex items-center justify-center">
+			<button 
+				class="flex items-center justify-center w-16 h-16 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all hover:scale-110"
+				onclick="playVideo()"
+			>
+				<svg class="w-6 h-6 text-forest ml-1" fill="currentColor" viewBox="0 0 24 24">
+					<path d="M8 5v14l11-7z"/>
+				</svg>
+			</button>
+		</div>
+	)}
+</div>
+
+<script>
+	function openMediaViewer() {
+		// TODO: Implement media viewer modal
+		console.log('Opening media viewer...');
+	}
+	
+	function playVideo() {
+		// TODO: Implement video player
+		console.log('Playing video...');
+	}
+</script>

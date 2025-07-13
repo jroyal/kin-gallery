@@ -1,0 +1,272 @@
+---
+import Header from './Header.astro';
+import MediaCard from './MediaCard.astro';
+
+export interface Props {
+	title?: string;
+	showDateHeaders?: boolean;
+	selectionMode?: boolean;
+	selectedItems?: number[];
+	mediaByDate?: Record<string, any[]>;
+	showBackButton?: boolean;
+}
+
+const { 
+	title = "All Photos & Videos",
+	showDateHeaders = true,
+	selectionMode = false,
+	selectedItems = [],
+	mediaByDate = {},
+	showBackButton = true
+} = Astro.props;
+
+// Mock data organized by date (like Image 2)
+const mockMediaByDate = Object.keys(mediaByDate).length > 0 ? mediaByDate : {
+	"Jul 13, 2025": [
+		{
+			id: 1,
+			filename: 'photo1.jpg',
+			type: 'photo',
+			width: 800,
+			height: 600,
+			taken_at: '2025-07-13T14:30:00Z'
+		},
+		{
+			id: 2,
+			filename: 'video1.mp4',
+			type: 'video',
+			width: 1920,
+			height: 1080,
+			taken_at: '2025-07-13T12:15:00Z'
+		},
+		{
+			id: 3,
+			filename: 'photo2.jpg',
+			type: 'photo',
+			width: 600,
+			height: 800,
+			taken_at: '2025-07-13T10:45:00Z'
+		},
+		{
+			id: 4,
+			filename: 'photo3.jpg',
+			type: 'photo',
+			width: 800,
+			height: 600,
+			taken_at: '2025-07-13T09:20:00Z'
+		},
+		{
+			id: 5,
+			filename: 'photo4.jpg',
+			type: 'photo',
+			width: 600,
+			height: 800,
+			taken_at: '2025-07-13T08:30:00Z'
+		}
+	],
+	"Jul 12, 2025": [
+		{
+			id: 6,
+			filename: 'photo5.jpg',
+			type: 'photo',
+			width: 800,
+			height: 600,
+			taken_at: '2025-07-12T16:45:00Z'
+		},
+		{
+			id: 7,
+			filename: 'photo6.jpg',
+			type: 'photo',
+			width: 800,
+			height: 600,
+			taken_at: '2025-07-12T15:20:00Z'
+		},
+		{
+			id: 8,
+			filename: 'photo7.jpg',
+			type: 'photo',
+			width: 600,
+			height: 800,
+			taken_at: '2025-07-12T14:10:00Z'
+		},
+		{
+			id: 9,
+			filename: 'video2.mp4',
+			type: 'video',
+			width: 1920,
+			height: 1080,
+			taken_at: '2025-07-12T13:30:00Z'
+		}
+	]
+};
+
+const totalSelectedCount = selectedItems.length;
+---
+
+<div class="min-h-screen bg-white">
+	<!-- Header -->
+	<Header 
+		title={selectionMode ? `${totalSelectedCount} Selected` : title}
+		showBackButton={showBackButton}
+		showDropdown={!selectionMode}
+		rightAction={selectionMode ? 
+			{ label: "Cancel", onClick: "exitSelectionMode()" } : 
+			{ icon: "M12 6v6m0 0v6m0-6h6m-6 0H6", onClick: "toggleSelectionMode()" }
+		}
+	/>
+
+	<!-- Content -->
+	<div class="pb-6">
+		<!-- Photo Organization Info -->
+		{!selectionMode && (
+			<div class="mx-4 mt-4 mb-6 p-4 bg-gradient-to-r from-forest/5 to-sage/10 rounded-lg border border-forest/20">
+				<div class="flex items-center justify-between">
+					<div class="flex items-center">
+						<div class="w-8 h-8 bg-forest rounded mr-3 flex items-center justify-center">
+							<svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+								<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6l3-4 2.03 2.71L14 13l4 6z"/>
+							</svg>
+						</div>
+						<div>
+							<h3 class="font-semibold text-gray-900">All Family Photos</h3>
+							<p class="text-sm text-gray-600">Organized by month and child</p>
+						</div>
+					</div>
+					<button 
+						class="px-4 py-2 bg-forest text-white rounded-lg text-sm font-medium hover:bg-forest/90 transition-colors"
+						onclick="showAirPlaySlideshow()"
+					>
+						Slideshow
+					</button>
+				</div>
+			</div>
+		)}
+
+		<!-- Media Grid by Date -->
+		{Object.entries(mockMediaByDate).map(([date, mediaItems]) => (
+			<section class="mb-8">
+				{/* Date Header */}
+				{showDateHeaders && (
+					<div class="flex items-center justify-between px-4 mb-4">
+						<h2 class="text-lg font-semibold text-gray-900">{date}</h2>
+						<button class="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors">
+							<div class="w-3 h-3 rounded-full border border-gray-400"></div>
+						</button>
+					</div>
+				)}
+
+				{/* Grid */}
+				<div class="grid grid-cols-4 gap-0.5 px-4">
+					{mediaItems.map((media) => (
+						<div class="aspect-square">
+							<MediaCard 
+								media={media}
+								size="thumb"
+								showDuration={media.type === 'video'}
+								showSelectionCircle={selectionMode}
+								isSelected={selectedItems.includes(media.id)}
+								onClick={selectionMode ? 
+									`toggleSelection(${media.id})` : 
+									`openMediaViewer(${media.id})`
+								}
+								className="rounded-none"
+							/>
+						</div>
+					))}
+				</div>
+			</section>
+		))}
+
+		<!-- Load More -->
+		<div class="px-4 mt-8">
+			<button class="w-full py-3 text-forest font-medium hover:bg-gray-50 rounded-lg transition-colors">
+				Load More Photos
+			</button>
+		</div>
+	</div>
+
+	<!-- Selection Mode Actions -->
+	{selectionMode && totalSelectedCount > 0 && (
+		<div class="fixed bottom-20 left-0 right-0 px-4 pb-4 safe-area-inset-bottom">
+			<div class="bg-white rounded-lg shadow-lg border border-gray-200 p-4">
+				<div class="grid grid-cols-2 gap-3">
+					<button 
+						class="flex items-center justify-center py-3 px-4 bg-forest text-white rounded-lg font-medium hover:bg-forest/90 transition-colors"
+						onclick="downloadOriginals()"
+					>
+						<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/>
+						</svg>
+						Download Originals
+					</button>
+					
+					<button 
+						class="flex items-center justify-center py-3 px-4 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition-colors"
+						onclick="addToAlbum()"
+					>
+						<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-3 2v5l-1-.75L15 9V2h2zm3 5V9h-1V2h1c.55 0 1 .45 1 1v4z"/>
+						</svg>
+						Add to Album
+					</button>
+				</div>
+			</div>
+		</div>
+	)}
+</div>
+
+<style>
+	.safe-area-inset-bottom {
+		padding-bottom: env(safe-area-inset-bottom);
+	}
+</style>
+
+<script>
+	let selectionMode = false;
+	let selectedItems = [];
+
+	function toggleSelectionMode() {
+		selectionMode = !selectionMode;
+		selectedItems = [];
+		location.reload(); // Temporary - would use state management
+	}
+
+	function exitSelectionMode() {
+		selectionMode = false;
+		selectedItems = [];
+		location.reload(); // Temporary - would use state management
+	}
+
+	function toggleSelection(mediaId) {
+		const index = selectedItems.indexOf(mediaId);
+		if (index > -1) {
+			selectedItems.splice(index, 1);
+		} else {
+			selectedItems.push(mediaId);
+		}
+		// Update UI - would use proper state management
+		console.log('Selected items:', selectedItems);
+	}
+
+	function openMediaViewer(mediaId) {
+		console.log('Opening media viewer for:', mediaId);
+	}
+
+	function downloadOriginals() {
+		// PRD Requirement U-07: Bulk-download originals for personal backups
+		console.log('Downloading originals for:', selectedItems);
+		// TODO: Implement ZIP download of original files
+	}
+
+	function addToAlbum() {
+		// Organize photos by child/family context
+		console.log('Adding to album:', selectedItems);
+		// TODO: Implement album organization
+	}
+	
+	function showAirPlaySlideshow() {
+		// PRD Requirement U-06: AirPlay slideshow from all photos view
+		console.log('Starting AirPlay slideshow from all photos...');
+		startAirPlaySlideshow();
+	}
+</script>

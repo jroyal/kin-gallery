@@ -1,0 +1,39 @@
+---
+import Layout from '../layouts/Layout.astro';
+import RecentsFeed from '../components/RecentsFeed.astro';
+import { authenticateFromContext } from '../lib/auth.js';
+
+// Get current user
+const user = authenticateFromContext(Astro);
+
+// TODO: Fetch real recent activity data
+// const recentActivity = await fetch(`${Astro.url.origin}/api/activity/recent`);
+// const activityData = await recentActivity.json();
+
+// TODO: Fetch real comments data  
+// const recentComments = await fetch(`${Astro.url.origin}/api/comments?recent=true`);
+// const commentsData = await recentComments.json();
+---
+
+<Layout title="Recents - KinGallery">
+	{user ? (
+		<RecentsFeed />
+	) : (
+		<div class="min-h-screen bg-parchment flex items-center justify-center">
+			<div class="max-w-md mx-auto text-center p-6">
+				<h2 class="text-2xl font-heading font-bold text-forest mb-4">
+					Authentication Required
+				</h2>
+				<p class="text-gray-600 mb-6">
+					Please sign in to view recent family activity.
+				</p>
+				<a 
+					href="/?simulate_user=dev@example.com"
+					class="inline-flex items-center px-6 py-3 bg-forest text-white font-medium rounded-lg hover:bg-forest/90 transition-colors"
+				>
+					Sign In (Dev Mode)
+				</a>
+			</div>
+		</div>
+	)}
+</Layout>

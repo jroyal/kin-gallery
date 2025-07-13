@@ -1,0 +1,97 @@
+---
+export interface Props {
+	title?: string;
+	showBackButton?: boolean;
+	showDropdown?: boolean;
+	backUrl?: string;
+	dropdownItems?: Array<{ label: string; value: string }>;
+	rightAction?: {
+		icon?: string;
+		label?: string;
+		url?: string;
+		onClick?: string;
+	};
+}
+
+const { 
+	title, 
+	showBackButton = false, 
+	showDropdown = false,
+	backUrl = "/",
+	dropdownItems = [],
+	rightAction
+} = Astro.props;
+---
+
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-gray-200">
+	<div class="flex items-center justify-between px-4 py-3 safe-area-inset-top">
+		<!-- Left side -->
+		<div class="flex items-center min-w-0 flex-1">
+			{showBackButton ? (
+				<a href={backUrl} class="flex items-center justify-center w-8 h-8 -ml-2 mr-2 rounded-full hover:bg-gray-100 transition-colors">
+					<svg class="w-6 h-6 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+					</svg>
+				</a>
+			) : (
+				<div class="w-8"></div>
+			)}
+			
+			<!-- Title with optional dropdown -->
+			{showDropdown ? (
+				<div class="relative">
+					<button class="flex items-center space-x-1 text-lg font-heading font-semibold text-gray-900 hover:text-forest transition-colors">
+						<span class="truncate">{title}</span>
+						<svg class="w-4 h-4 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M7 10l5 5 5-5z"/>
+						</svg>
+					</button>
+					<!-- Dropdown menu would be implemented with Alpine.js or similar -->
+				</div>
+			) : (
+				<h1 class="text-lg font-heading font-semibold text-gray-900 truncate">
+					{title}
+				</h1>
+			)}
+		</div>
+
+		<!-- Right side action -->
+		{rightAction && (
+			<div class="flex items-center ml-4">
+				{rightAction.url ? (
+					<a 
+						href={rightAction.url}
+						class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors"
+					>
+						{rightAction.icon ? (
+							<svg class="w-5 h-5 text-forest" fill="currentColor" viewBox="0 0 24 24">
+								<path d={rightAction.icon} />
+							</svg>
+						) : (
+							<span class="text-sm font-medium text-forest">{rightAction.label}</span>
+						)}
+					</a>
+				) : (
+					<button 
+						class="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 transition-colors"
+						onclick={rightAction.onClick}
+					>
+						{rightAction.icon ? (
+							<svg class="w-5 h-5 text-forest" fill="currentColor" viewBox="0 0 24 24">
+								<path d={rightAction.icon} />
+							</svg>
+						) : (
+							<span class="text-sm font-medium text-forest">{rightAction.label}</span>
+						)}
+					</button>
+				)}
+			</div>
+		)}
+	</div>
+</header>
+
+<style>
+	.safe-area-inset-top {
+		padding-top: env(safe-area-inset-top);
+	}
+</style>

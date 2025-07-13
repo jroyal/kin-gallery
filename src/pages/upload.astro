@@ -1,0 +1,163 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import { authenticateFromContext } from '../lib/auth.js';
+
+// Get current user
+const user = authenticateFromContext(Astro);
+---
+
+<Layout title="Upload - KinGallery">
+	{user ? (
+		<div class="min-h-screen bg-parchment">
+			<Header title="Upload Photos" showBackButton={true} />
+			
+			<div class="px-4 py-6">
+				<!-- Upload Area -->
+				<div class="bg-white rounded-lg shadow-sm border-2 border-dashed border-gray-300 p-8 text-center hover:border-forest transition-colors">
+					<div class="max-w-sm mx-auto">
+						<div class="w-16 h-16 mx-auto mb-4 bg-forest/10 rounded-full flex items-center justify-center">
+							<svg class="w-8 h-8 text-forest" fill="currentColor" viewBox="0 0 24 24">
+								<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+							</svg>
+						</div>
+						
+						<h3 class="text-lg font-heading font-semibold text-gray-900 mb-2">
+							Upload Photos & Videos
+						</h3>
+						
+						<p class="text-gray-600 mb-6">
+							Drag and drop your photos here, or click to browse files.
+						</p>
+						
+						<input 
+							type="file" 
+							id="fileInput"
+							multiple 
+							accept="image/*,video/*"
+							class="hidden"
+							onchange="handleFileUpload(this.files)"
+						/>
+						
+						<button 
+							onclick="document.getElementById('fileInput').click()"
+							class="w-full py-3 px-6 bg-forest text-white font-medium rounded-lg hover:bg-forest/90 transition-colors"
+						>
+							Choose Files
+						</button>
+					</div>
+				</div>
+
+				<!-- Quick Actions -->
+				<div class="mt-6 grid grid-cols-2 gap-4">
+					<button class="flex items-center justify-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all">
+						<svg class="w-6 h-6 text-forest mr-3" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
+						</svg>
+						<span class="font-medium text-gray-900">Take Photo</span>
+					</button>
+					
+					<button class="flex items-center justify-center p-4 bg-white rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition-all">
+						<svg class="w-6 h-6 text-forest mr-3" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+						</svg>
+						<span class="font-medium text-gray-900">Record Video</span>
+					</button>
+				</div>
+
+				<!-- Child Selection -->
+				<div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+					<h4 class="font-medium text-gray-900 mb-3">Select Child</h4>
+					<div class="space-y-2">
+						<label class="flex items-center">
+							<input type="radio" name="child" value="1" class="text-forest focus:ring-forest" checked />
+							<span class="ml-3 text-gray-700">Amelia (1 yr 6 mos)</span>
+						</label>
+						<label class="flex items-center">
+							<input type="radio" name="child" value="2" class="text-forest focus:ring-forest" />
+							<span class="ml-3 text-gray-700">Family Photos</span>
+						</label>
+					</div>
+				</div>
+
+				<!-- Upload Progress (hidden by default) -->
+				<div id="uploadProgress" class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4 hidden">
+					<h4 class="font-medium text-gray-900 mb-3">Uploading...</h4>
+					<div class="w-full bg-gray-200 rounded-full h-2">
+						<div id="progressBar" class="bg-forest h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+					</div>
+					<p class="text-sm text-gray-600 mt-2">
+						<span id="uploadStatus">Preparing files...</span>
+					</p>
+				</div>
+			</div>
+		</div>
+	) : (
+		<div class="min-h-screen bg-parchment flex items-center justify-center">
+			<div class="max-w-md mx-auto text-center p-6">
+				<h2 class="text-2xl font-heading font-bold text-forest mb-4">
+					Authentication Required
+				</h2>
+				<p class="text-gray-600 mb-6">
+					Please sign in to upload photos and videos.
+				</p>
+				<a 
+					href="/?simulate_user=dev@example.com"
+					class="inline-flex items-center px-6 py-3 bg-forest text-white font-medium rounded-lg hover:bg-forest/90 transition-colors"
+				>
+					Sign In (Dev Mode)
+				</a>
+			</div>
+		</div>
+	)}
+</Layout>
+
+<script>
+	function handleFileUpload(files) {
+		if (!files || files.length === 0) return;
+		
+		console.log('Selected files:', files.length);
+		
+		// Show progress
+		const progressDiv = document.getElementById('uploadProgress');
+		const progressBar = document.getElementById('progressBar');
+		const statusText = document.getElementById('uploadStatus');
+		
+		if (progressDiv && progressBar && statusText) {
+			progressDiv.classList.remove('hidden');
+			
+			// Simulate upload progress
+			let progress = 0;
+			const interval = setInterval(() => {
+				progress += Math.random() * 20;
+				if (progress >= 100) {
+					progress = 100;
+					clearInterval(interval);
+					statusText.textContent = 'Upload complete!';
+					
+					// Redirect after success
+					setTimeout(() => {
+						window.location.href = '/';
+					}, 1500);
+				} else {
+					statusText.textContent = `Uploading ${Math.round(progress)}%...`;
+				}
+				
+				progressBar.style.width = `${progress}%`;
+			}, 500);
+		}
+		
+		// TODO: Implement actual file upload to /api/upload
+		// const formData = new FormData();
+		// for (let file of files) {
+		//   formData.append('file', file);
+		//   formData.append('child_id', getSelectedChildId());
+		// }
+		// 
+		// fetch('/api/upload', {
+		//   method: 'POST',
+		//   body: formData
+		// }).then(response => response.json())
+		//   .then(data => console.log('Upload success:', data));
+	}
+</script>

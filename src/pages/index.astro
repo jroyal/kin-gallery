@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import AlbumsGrid from '../components/AlbumsGrid.astro';
 import { runMigrations } from '../lib/db.js';
 import { authenticateFromContext } from '../lib/auth.js';
 
@@ -8,79 +9,86 @@ runMigrations();
 
 // Get current user for development
 const user = authenticateFromContext(Astro);
+
+// Get current month from query params
+const url = new URL(Astro.request.url);
+const currentMonth = url.searchParams.get('month') || new Date().toISOString().slice(0, 7);
+
+// TODO: Fetch real data from API
+// const mediaResponse = await fetch(`${Astro.url.origin}/api/media?month=${currentMonth}`);
+// const mediaData = await mediaResponse.json();
 ---
 
-<Layout>
-	<div class="min-h-screen bg-parchment">
-		<div class="container mx-auto px-4 py-8">
-			<header class="text-center mb-8">
-				<h1 class="text-4xl font-heading font-bold text-forest mb-2">
-					KinGallery
-				</h1>
-				<p class="text-moss text-lg">
-					Ad-free family photo sharing
-				</p>
-			</header>
+<Layout title="KinGallery - Family Photos">
+	{user ? (
+		<AlbumsGrid currentMonth={currentMonth} />
+	) : (
+		<!-- Development/Authentication Status Page -->
+		<div class="min-h-screen bg-parchment">
+			<div class="container mx-auto px-4 py-8">
+				<header class="text-center mb-8">
+					<h1 class="text-4xl font-heading font-bold text-forest mb-2">
+						KinGallery
+					</h1>
+					<p class="text-moss text-lg">
+						Ad-free family photo sharing
+					</p>
+				</header>
 
-			<div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
-				<h2 class="text-2xl font-heading font-semibold text-forest mb-4">
-					Development Status
-				</h2>
+				<div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+					<h2 class="text-2xl font-heading font-semibold text-forest mb-4">
+						Development Status
+					</h2>
 
-				{user ? (
-					<div class="mb-6 p-4 bg-sage/20 rounded-lg">
-						<p class="text-forest">
-							✅ <strong>Authenticated as:</strong> {user.email}
-						</p>
-						<p class="text-moss">
-							Role: {user.role} {user.isAdmin && '(Admin)'}
-						</p>
-					</div>
-				) : (
 					<div class="mb-6 p-4 bg-yellow-100 rounded-lg">
 						<p class="text-yellow-800">
 							⚠️ No authentication detected. In production, this would require Cloudflare Access.
 						</p>
-					</div>
-				)}
-
-				<div class="space-y-4">
-					<div>
-						<h3 class="font-semibold text-forest mb-2">✅ Backend Complete</h3>
-						<ul class="text-moss space-y-1 ml-4">
-							<li>• SQLite database with migrations</li>
-							<li>• Media processing (Sharp + ffmpeg)</li>
-							<li>• Authentication system</li>
-							<li>• REST API endpoints</li>
-							<li>• PWA service worker</li>
-						</ul>
+						<p class="text-yellow-700 text-sm mt-2">
+							Add <code>?simulate_user=test@example.com</code> to the URL to simulate authentication.
+						</p>
 					</div>
 
-					<div>
-						<h3 class="font-semibold text-forest mb-2">🚧 Next: Frontend Components</h3>
-						<ul class="text-moss space-y-1 ml-4">
-							<li>• Albums grid layout</li>
-							<li>• Upload interface</li>
-							<li>• Media viewer with comments</li>
-							<li>• Admin dashboard</li>
-						</ul>
-					</div>
+					<div class="space-y-4">
+						<div>
+							<h3 class="font-semibold text-forest mb-2">✅ Backend Complete</h3>
+							<ul class="text-moss space-y-1 ml-4">
+								<li>• SQLite database with migrations</li>
+								<li>• Media processing (Sharp + ffmpeg)</li>
+								<li>• Authentication system</li>
+								<li>• REST API endpoints</li>
+								<li>• PWA service worker</li>
+							</ul>
+						</div>
 
-					<div class="mt-6 p-4 bg-moss/10 rounded-lg">
-						<h3 class="font-semibold text-forest mb-2">API Endpoints Available</h3>
-						<div class="text-sm text-moss space-y-1">
-							<div><code>/api/health</code> - Service health check</div>
-							<div><code>/api/auth/me</code> - Current user info</div>
-							<div><code>/api/children</code> - Child management</div>
-							<div><code>/api/upload</code> - Media upload</div>
-							<div><code>/api/media</code> - Browse media</div>
-							<div><code>/api/comments</code> - Comment system</div>
-							<div><code>/api/reactions</code> - Heart reactions</div>
-							<div><code>/api/admin/users</code> - User management</div>
+						<div>
+							<h3 class="font-semibold text-forest mb-2">🚧 Frontend Components (In Progress)</h3>
+							<ul class="text-moss space-y-1 ml-4">
+								<li>• ✅ Albums grid layout</li>
+								<li>• ✅ Navigation system</li>
+								<li>• ✅ Media cards and hero photos</li>
+								<li>• 🚧 Upload interface</li>
+								<li>• 🚧 Media viewer with comments</li>
+								<li>• 🚧 Admin dashboard</li>
+							</ul>
+						</div>
+
+						<div class="mt-6 p-4 bg-moss/10 rounded-lg">
+							<h3 class="font-semibold text-forest mb-2">API Endpoints Available</h3>
+							<div class="text-sm text-moss space-y-1">
+								<div><code>/api/health</code> - Service health check</div>
+								<div><code>/api/auth/me</code> - Current user info</div>
+								<div><code>/api/children</code> - Child management</div>
+								<div><code>/api/upload</code> - Media upload</div>
+								<div><code>/api/media</code> - Browse media</div>
+								<div><code>/api/comments</code> - Comment system</div>
+								<div><code>/api/reactions</code> - Heart reactions</div>
+								<div><code>/api/admin/users</code> - User management</div>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 		</div>
-	</div>
+	)}
 </Layout>

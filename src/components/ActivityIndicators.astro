@@ -1,0 +1,79 @@
+---
+export interface Props {
+	activities?: Array<{
+		id: string;
+		label: string;
+		color: string;
+		timeAgo: string;
+		count?: number;
+	}>;
+}
+
+const { activities = [] } = Astro.props;
+
+// Family member activity - focus on actual family context
+const defaultActivities = activities.length > 0 ? activities : [
+	{
+		id: '1',
+		label: 'Mom',
+		color: 'bg-rose-400',
+		timeAgo: '2d ago',
+		count: 3
+	},
+	{
+		id: '2', 
+		label: 'Dad',
+		color: 'bg-blue-400',
+		timeAgo: '3d ago',
+		count: 2
+	},
+	{
+		id: '3',
+		label: 'GM',
+		color: 'bg-purple-400', 
+		timeAgo: '4d ago',
+		count: 1
+	},
+	{
+		id: '4',
+		label: 'GF',
+		color: 'bg-orange-400',
+		timeAgo: '5d ago',
+		count: 2
+	},
+	{
+		id: '5',
+		label: 'Ant',
+		color: 'bg-green-400',
+		timeAgo: '1w ago',
+		count: 1
+	}
+];
+---
+
+<div class="px-4 py-4">
+	<div class="flex justify-between items-center">
+		{defaultActivities.map((activity) => (
+			<div class="flex flex-col items-center space-y-2">
+				<!-- Colored Circle with Initials -->
+				<div class={`w-12 h-12 rounded-full ${activity.color} flex items-center justify-center shadow-sm`}>
+					<span class="text-white font-semibold text-sm">
+						{activity.label}
+					</span>
+				</div>
+				
+				<!-- Time Ago -->
+				<span class="text-xs text-gray-500 font-medium">
+					{activity.timeAgo}
+				</span>
+				
+				<!-- Optional count badge -->
+				{activity.count && activity.count > 1 && (
+					<div class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+						{activity.count}
+					</div>
+				)}
+			</div>
+		))}
+	</div>
+</div>

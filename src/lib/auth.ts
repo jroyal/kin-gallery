@@ -1,4 +1,4 @@
-import { db, UserSchema, type User } from './db.js';
+import { db, UserSchema, type User, runMigrations } from './db.js';
 import type { APIContext } from 'astro';
 
 const CF_ACCESS_JWT_HEADER = 'CF-Access-Jwt-Assertion';
@@ -52,6 +52,9 @@ function isValidEmail(email: string): boolean {
 }
 
 export function getOrCreateUser(email: string): User {
+  // Ensure database is initialized
+  runMigrations();
+  
   if (!isValidEmail(email)) {
     throw new Error('Invalid email address');
   }
@@ -149,53 +152,67 @@ export function requireAdmin(context: APIContext): AuthenticatedUser {
   return user;
 }
 
-// Database queries for user management
-export const userQueries = {
-  getById: db.prepare(`
-    SELECT * FROM users 
-    WHERE id = ? AND deleted_at IS NULL
-  `),
+// Database queries for user management (lazy initialization)
+let userQueries: any = null;
 
-  getByEmail: db.prepare(`
-    SELECT * FROM users 
-    WHERE email = ? AND deleted_at IS NULL
-  `),
+function getUserQueries() {
+  if (!userQueries) {
+    // Ensure database is initialized first
+    runMigrations();
+    
+    userQueries = {
+      getById: db.prepare(`
+        SELECT * FROM users 
+        WHERE id = ? AND deleted_at IS NULL
+      `),
 
-  list: db.prepare(`
-    SELECT * FROM users 
-    WHERE deleted_at IS NULL 
-    ORDER BY created_at DESC
-  `),
+      getByEmail: db.prepare(`
+        SELECT * FROM users 
+        WHERE email = ? AND deleted_at IS NULL
+      `),
 
-  updateRole: db.prepare(`
-    UPDATE users 
-    SET role = ? 
-    WHERE id = ? AND deleted_at IS NULL
-  `),
+      list: db.prepare(`
+        SELECT * FROM users 
+        WHERE deleted_at IS NULL 
+        ORDER BY created_at DESC
+      `),
 
-  softDelete: db.prepare(`
-    UPDATE users 
-    SET deleted_at = datetime('now') 
-    WHERE id = ? AND deleted_at IS NULL
-  `)
-};
+      updateRole: db.prepare(`
+        UPDATE users 
+        SET role = ? 
+        WHERE id = ? AND deleted_at IS NULL
+      `),
+
+      softDelete: db.prepare(`
+        UPDATE users 
+        SET deleted_at = datetime('now') 
+        WHERE id = ? AND deleted_at IS NULL
+      `)
+    };
+  }
+  return userQueries;
+}
 
 export function updateUserRole(userId: number, role: 'admin' | 'user'): boolean {
-  const result = userQueries.updateRole.run(role, userId);
+  const queries = getUserQueries();
+  const result = queries.updateRole.run(role, userId);
   return result.changes > 0;
 }
 
 export function getAllUsers(): User[] {
-  const users = userQueries.list.all() as User[];
+  const queries = getUserQueries();
+  const users = queries.list.all() as User[];
   return users.map(user => UserSchema.parse(user));
 }
 
 export function getUserById(id: number): User | null {
-  const user = userQueries.getById.get(id) as User | undefined;
+  const queries = getUserQueries();
+  const user = queries.getById.get(id) as User | undefined;
   return user ? UserSchema.parse(user) : null;
 }
 
 export function deleteUser(userId: number): boolean {
-  const result = userQueries.softDelete.run(userId);
+  const queries = getUserQueries();
+  const result = queries.softDelete.run(userId);
   return result.changes > 0;
 }

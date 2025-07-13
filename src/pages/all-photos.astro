@@ -1,0 +1,46 @@
+---
+import Layout from '../layouts/Layout.astro';
+import MediaGrid from '../components/MediaGrid.astro';
+import { authenticateFromContext } from '../lib/auth.js';
+
+// Get current user
+const user = authenticateFromContext(Astro);
+
+// Get query parameters
+const url = new URL(Astro.request.url);
+const selectionMode = url.searchParams.get('selection') === 'true';
+const selectedItems = url.searchParams.get('selected')?.split(',').map(Number) || [];
+
+// TODO: Fetch real media data
+// const mediaResponse = await fetch(`${Astro.url.origin}/api/media?all=true`);
+// const mediaData = await mediaResponse.json();
+---
+
+<Layout title="All Photos - KinGallery" showNavigation={!selectionMode}>
+	{user ? (
+		<MediaGrid 
+			title="All Photos & Videos"
+			showDateHeaders={true}
+			selectionMode={selectionMode}
+			selectedItems={selectedItems}
+			showBackButton={true}
+		/>
+	) : (
+		<div class="min-h-screen bg-parchment flex items-center justify-center">
+			<div class="max-w-md mx-auto text-center p-6">
+				<h2 class="text-2xl font-heading font-bold text-forest mb-4">
+					Authentication Required
+				</h2>
+				<p class="text-gray-600 mb-6">
+					Please sign in to view all photos and videos.
+				</p>
+				<a 
+					href="/?simulate_user=dev@example.com"
+					class="inline-flex items-center px-6 py-3 bg-forest text-white font-medium rounded-lg hover:bg-forest/90 transition-colors"
+				>
+					Sign In (Dev Mode)
+				</a>
+			</div>
+		</div>
+	)}
+</Layout>

@@ -1,0 +1,95 @@
+---
+export interface Props {
+	media: {
+		id: number;
+		filename: string;
+		type: 'photo' | 'video';
+		width?: number;
+		height?: number;
+		taken_at: string;
+	};
+	size?: 'thumb' | 'medium' | 'hero';
+	showDuration?: boolean;
+	isSelected?: boolean;
+	showSelectionCircle?: boolean;
+	onClick?: string;
+	className?: string;
+}
+
+const { 
+	media, 
+	size = 'thumb', 
+	showDuration = false,
+	isSelected = false,
+	showSelectionCircle = false,
+	onClick,
+	className = ""
+} = Astro.props;
+
+// Generate the appropriate image URL based on size
+const getImageUrl = (filename: string, size: string) => {
+	if (size === 'hero' || size === 'medium') {
+		return `/media/${filename.replace(/\.[^/.]+$/, '')}_${size}.jpg`;
+	}
+	return `/media/thumbs/${filename}`;
+};
+
+const imageUrl = getImageUrl(media.filename, size);
+const aspectRatio = media.width && media.height ? media.width / media.height : 1;
+---
+
+<div 
+	class={`relative overflow-hidden bg-gray-100 ${className}`}
+	style={`aspect-ratio: ${aspectRatio}`}
+	onclick={onClick}
+>
+	<!-- Image -->
+	<img 
+		src={imageUrl}
+		alt={`Media from ${new Date(media.taken_at).toLocaleDateString()}`}
+		class="w-full h-full object-cover transition-transform duration-200 hover:scale-105"
+		loading="lazy"
+	/>
+
+	<!-- Video indicator -->
+	{media.type === 'video' && (
+		<div class="absolute top-2 right-2">
+			<div class="flex items-center justify-center w-8 h-8 bg-black/50 rounded-full">
+				<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+					<path d="M8 5v14l11-7z"/>
+				</svg>
+			</div>
+		</div>
+	)}
+
+	<!-- Duration (for videos) -->
+	{showDuration && media.type === 'video' && (
+		<div class="absolute bottom-2 right-2">
+			<span class="px-2 py-1 text-xs font-medium text-white bg-black/50 rounded">
+				0:30
+			</span>
+		</div>
+	)}
+
+	<!-- Selection circle -->
+	{showSelectionCircle && (
+		<div class="absolute top-2 left-2">
+			<div class={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+				isSelected 
+					? 'bg-forest border-forest' 
+					: 'bg-white/80 border-white/80 hover:bg-white'
+			}`}>
+				{isSelected && (
+					<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+					</svg>
+				)}
+			</div>
+		</div>
+	)}
+
+	<!-- Hover overlay for larger sizes -->
+	{(size === 'medium' || size === 'hero') && (
+		<div class="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors cursor-pointer"></div>
+	)}
+</div>
