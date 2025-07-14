@@ -36,7 +36,7 @@ export const GET: APIRoute = async (context) => {
     return new Response(JSON.stringify({
       comments: comments.map(comment => ({
         ...CommentSchema.parse(comment),
-        user_email: comment.user_email
+        user_email: (comment as any).user_email
       }))
     }), {
       status: 200,
@@ -90,7 +90,7 @@ export const POST: APIRoute = async (context) => {
     return new Response(JSON.stringify({
       comment: {
         ...CommentSchema.parse(comment),
-        user_email: comment.user_email
+        user_email: (comment as any).user_email
       }
     }), {
       status: 201,
@@ -159,7 +159,7 @@ export const PUT: APIRoute = async (context) => {
     return new Response(JSON.stringify({
       comment: {
         ...CommentSchema.parse(comment),
-        user_email: comment.user_email
+        user_email: (comment as any).user_email
       }
     }), {
       status: 200,

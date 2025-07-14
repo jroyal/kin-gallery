@@ -2,7 +2,7 @@ import { db, UserSchema, type User, runMigrations } from './db.js';
 import type { APIContext } from 'astro';
 
 const CF_ACCESS_JWT_HEADER = 'CF-Access-Jwt-Assertion';
-const DEVELOPMENT_MODE = process.env.NODE_ENV !== 'production';
+const DEVELOPMENT_MODE = process.env['NODE_ENV'] !== 'production';
 
 export interface AuthenticatedUser {
   id: number;

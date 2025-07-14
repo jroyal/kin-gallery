@@ -125,39 +125,76 @@ const user = authenticateFromContext(Astro);
 		
 		if (progressDiv && progressBar && statusText) {
 			progressDiv.classList.remove('hidden');
-			
-			// Simulate upload progress
-			let progress = 0;
-			const interval = setInterval(() => {
-				progress += Math.random() * 20;
-				if (progress >= 100) {
-					progress = 100;
-					clearInterval(interval);
-					statusText.textContent = 'Upload complete!';
-					
-					// Redirect after success
-					setTimeout(() => {
-						window.location.href = '/';
-					}, 1500);
-				} else {
-					statusText.textContent = `Uploading ${Math.round(progress)}%...`;
-				}
-				
-				progressBar.style.width = `${progress}%`;
-			}, 500);
 		}
 		
-		// TODO: Implement actual file upload to /api/upload
-		// const formData = new FormData();
-		// for (let file of files) {
-		//   formData.append('file', file);
-		//   formData.append('child_id', getSelectedChildId());
-		// }
-		// 
-		// fetch('/api/upload', {
-		//   method: 'POST',
-		//   body: formData
-		// }).then(response => response.json())
-		//   .then(data => console.log('Upload success:', data));
+		// Real file upload implementation
+		uploadFiles(files);
+	}
+
+	async function uploadFiles(files) {
+		const progressBar = document.getElementById('progressBar');
+		const statusText = document.getElementById('uploadStatus');
+		const selectedChildId = getSelectedChildId();
+		
+		let totalFiles = files.length;
+		let uploadedFiles = 0;
+		let failedFiles = 0;
+
+		for (let file of files) {
+			try {
+				if (statusText) {
+					statusText.textContent = `Uploading ${file.name}... (${uploadedFiles + 1}/${totalFiles})`;
+				}
+
+				const formData = new FormData();
+				formData.append('file', file);
+				formData.append('child_id', selectedChildId);
+
+				const response = await fetch('/api/upload', {
+					method: 'POST',
+					body: formData
+				});
+
+				if (response.ok) {
+					const result = await response.json();
+					console.log('Upload success:', result);
+					uploadedFiles++;
+				} else {
+					const error = await response.text();
+					console.error('Upload failed:', error);
+					failedFiles++;
+				}
+			} catch (error) {
+				console.error('Upload error:', error);
+				failedFiles++;
+			}
+
+			// Update progress
+			const progress = ((uploadedFiles + failedFiles) / totalFiles) * 100;
+			if (progressBar) {
+				progressBar.style.width = `${progress}%`;
+			}
+		}
+
+		// Show final status
+		if (statusText) {
+			if (failedFiles === 0) {
+				statusText.textContent = `Upload complete! ${uploadedFiles} files uploaded.`;
+			} else {
+				statusText.textContent = `Upload finished. ${uploadedFiles} succeeded, ${failedFiles} failed.`;
+			}
+		}
+
+		// Redirect after success
+		if (uploadedFiles > 0) {
+			setTimeout(() => {
+				window.location.href = '/';
+			}, 2000);
+		}
+	}
+
+	function getSelectedChildId() {
+		const selectedRadio = document.querySelector('input[name="child"]:checked');
+		return selectedRadio ? selectedRadio.value : '1';
 	}
 </script>

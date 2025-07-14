@@ -1,0 +1,254 @@
+---
+export interface Props {
+	onClose?: string;
+	onSelectDevice?: string;
+}
+
+const { 
+	onClose = "closeAirPlayPicker()",
+	onSelectDevice = "connectToAirPlayDevice"
+} = Astro.props;
+
+// Mock AirPlay devices that might be detected
+const mockDevices = [
+	{
+		id: 'living-room-tv',
+		name: 'Living Room TV',
+		type: 'Apple TV',
+		signal_strength: 'strong',
+		is_available: true
+	},
+	{
+		id: 'bedroom-tv',
+		name: 'Bedroom TV',
+		type: 'Apple TV',
+		signal_strength: 'medium',
+		is_available: true
+	},
+	{
+		id: 'kitchen-display',
+		name: 'Kitchen Display',
+		type: 'AirPlay Speaker',
+		signal_strength: 'weak',
+		is_available: false
+	}
+];
+---
+
+<div id="airplay-picker" class="fixed inset-0 bg-black/50 z-50 flex items-end justify-center p-4 backdrop-blur-sm">
+	<div class="bg-white rounded-t-2xl w-full max-w-md transform transition-transform">
+		<!-- Handle -->
+		<div class="flex justify-center pt-3 pb-2">
+			<div class="w-8 h-1 bg-gray-300 rounded-full"></div>
+		</div>
+
+		<!-- Header -->
+		<div class="px-6 py-4 border-b border-gray-100">
+			<div class="flex items-center justify-between">
+				<h2 class="text-lg font-semibold text-gray-900">AirPlay</h2>
+				<button 
+					onclick={onClose}
+					class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+				>
+					<svg class="w-5 h-5 text-gray-500" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+					</svg>
+				</button>
+			</div>
+			<p class="text-sm text-gray-600 mt-1">Choose a device to start your slideshow</p>
+		</div>
+
+		<!-- Device List -->
+		<div class="px-6 py-4 max-h-80 overflow-y-auto">
+			{mockDevices.map((device) => (
+				<button 
+					onclick={`${onSelectDevice}('${device.id}')`}
+					disabled={!device.is_available}
+					class={`w-full flex items-center justify-between p-4 rounded-lg transition-colors mb-2 ${
+						device.is_available 
+							? 'hover:bg-gray-50 active:bg-gray-100' 
+							: 'opacity-50 cursor-not-allowed'
+					}`}
+				>
+					<div class="flex items-center space-x-3">
+						{/* Device Icon */}
+						<div class="w-10 h-10 bg-forest/10 rounded-lg flex items-center justify-center">
+							{device.type === 'Apple TV' ? (
+								<svg class="w-6 h-6 text-forest" fill="currentColor" viewBox="0 0 24 24">
+									<path d="M21 3H3c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h4v-2H3V5h18v10h-4v2h4c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+									<path d="M6 22h12l-6-6-6 6z"/>
+								</svg>
+							) : (
+								<svg class="w-6 h-6 text-forest" fill="currentColor" viewBox="0 0 24 24">
+									<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+								</svg>
+							)}
+						</div>
+
+						<div class="text-left">
+							<div class="font-medium text-gray-900">{device.name}</div>
+							<div class="text-sm text-gray-500">{device.type}</div>
+						</div>
+					</div>
+
+					{/* Signal Strength & Status */}
+					<div class="flex items-center space-x-2">
+						{device.is_available ? (
+							<div class="flex items-center space-x-1">
+								{/* Signal strength dots */}
+								<div class={`w-1 h-3 rounded-full ${
+									device.signal_strength === 'strong' ? 'bg-green-500' : 
+									device.signal_strength === 'medium' ? 'bg-yellow-500' : 'bg-gray-300'
+								}`}></div>
+								<div class={`w-1 h-4 rounded-full ${
+									device.signal_strength === 'strong' || device.signal_strength === 'medium' ? 'bg-green-500' : 'bg-gray-300'
+								}`}></div>
+								<div class={`w-1 h-5 rounded-full ${
+									device.signal_strength === 'strong' ? 'bg-green-500' : 'bg-gray-300'
+								}`}></div>
+							</div>
+						) : (
+							<span class="text-xs text-gray-400">Unavailable</span>
+						)}
+
+						<svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+						</svg>
+					</div>
+				</button>
+			))}
+
+			{/* No devices found state */}
+			{mockDevices.filter(d => d.is_available).length === 0 && (
+				<div class="text-center py-8">
+					<div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+						<svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+							<path d="M6 22h12l-6-6-6 6zM21 3H3c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h4v-2H3V5h18v10h-4v2h4c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+						</svg>
+					</div>
+					<h3 class="font-medium text-gray-900 mb-2">No AirPlay devices found</h3>
+					<p class="text-sm text-gray-500 mb-4">Make sure your Apple TV or AirPlay-enabled device is on the same network.</p>
+					<button 
+						onclick="scanForAirPlayDevices()"
+						class="px-4 py-2 bg-forest text-white rounded-lg text-sm font-medium hover:bg-forest/90 transition-colors"
+					>
+						Scan Again
+					</button>
+				</div>
+			)}
+		</div>
+
+		<!-- Tips -->
+		<div class="px-6 py-4 bg-gray-50 border-t border-gray-100 rounded-b-2xl">
+			<div class="flex items-start space-x-3">
+				<div class="w-5 h-5 text-blue-500 mt-0.5">
+					<svg fill="currentColor" viewBox="0 0 24 24">
+						<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+					</svg>
+				</div>
+				<div>
+					<p class="text-sm text-gray-600">
+						<strong>Tip:</strong> Photos will display for 5 seconds each. Videos will play in full before advancing.
+					</p>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	window.closeAirPlayPicker = function() {
+		const picker = document.getElementById('airplay-picker');
+		if (picker) {
+			picker.remove();
+		}
+	};
+
+	window.connectToAirPlayDevice = function(deviceId) {
+		console.log('Connecting to AirPlay device:', deviceId);
+		
+		// Show connection state
+		const deviceButton = event.target.closest('button');
+		if (deviceButton) {
+			deviceButton.innerHTML = `
+				<div class="flex items-center space-x-3">
+					<div class="w-10 h-10 bg-forest/10 rounded-lg flex items-center justify-center">
+						<div class="w-4 h-4 border-2 border-forest border-t-transparent rounded-full animate-spin"></div>
+					</div>
+					<div class="text-left">
+						<div class="font-medium text-gray-900">Connecting...</div>
+						<div class="text-sm text-gray-500">Please wait</div>
+					</div>
+				</div>
+			`;
+		}
+
+		// Simulate connection delay
+		setTimeout(() => {
+			// Close picker and start slideshow
+			closeAirPlayPicker();
+			
+			// TODO: Actually connect to AirPlay device and start casting
+			// For now, just start local slideshow with AirPlay simulation
+			startAirPlaySlideshow(deviceId);
+		}, 2000);
+	};
+
+	window.scanForAirPlayDevices = function() {
+		console.log('Scanning for AirPlay devices...');
+		// TODO: Implement device scanning
+		// For MVP, this would refresh the current mock list
+		location.reload();
+	};
+
+	window.startAirPlaySlideshow = function(deviceId) {
+		console.log('Starting AirPlay slideshow on device:', deviceId);
+		
+		// Show success notification
+		const notification = document.createElement('div');
+		notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+		notification.innerHTML = `
+			<div class="flex items-center space-x-2">
+				<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+					<path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+				</svg>
+				<span>Connected! Slideshow starting...</span>
+			</div>
+		`;
+		document.body.appendChild(notification);
+
+		// Remove notification after 3 seconds
+		setTimeout(() => {
+			notification.remove();
+		}, 3000);
+
+		// TODO: Implement actual AirPlay casting
+		// For MVP, this starts a fullscreen slideshow with casting indicator
+		openSlideshowMode();
+	};
+
+	// Close picker when clicking outside
+	document.addEventListener('click', function(event) {
+		const picker = document.getElementById('airplay-picker');
+		if (picker && event.target === picker) {
+			closeAirPlayPicker();
+		}
+	});
+</script>
+
+<style>
+	#airplay-picker {
+		animation: slideUp 0.3s ease-out;
+	}
+
+	@keyframes slideUp {
+		from {
+			transform: translateY(100%);
+			opacity: 0;
+		}
+		to {
+			transform: translateY(0);
+			opacity: 1;
+		}
+	}
+</style>

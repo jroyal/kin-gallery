@@ -61,9 +61,9 @@ export const GET: APIRoute = async (context) => {
     return new Response(JSON.stringify({
       media: media.map(item => ({
         ...MediaSchema.parse(item),
-        child_name: item.child_name,
-        reaction_count: item.reaction_count,
-        comment_count: item.comment_count
+        child_name: (item as any).child_name,
+        reaction_count: (item as any).reaction_count,
+        comment_count: (item as any).comment_count
       })),
       pagination: {
         total: total.count,

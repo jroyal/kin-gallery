@@ -1,0 +1,195 @@
+---
+// Global script component to provide shared functionality
+---
+
+<script>
+	// Global state management for media viewer and slideshow
+	window.KinGallery = {
+		currentUser: null,
+		mediaViewerActive: false,
+		slideshowActive: false,
+		currentMediaList: [],
+		currentMediaIndex: 0
+	};
+
+	// Media Viewer Functions
+	window.openMediaViewer = function(mediaId, mediaList = [], isSlideshow = false) {
+		console.log('Opening media viewer for:', mediaId, 'slideshow:', isSlideshow);
+		
+		// TODO: Fetch media details from API if not provided
+		// For now, use mock data
+		const mockMedia = {
+			id: mediaId,
+			filename: `photo${mediaId}.jpg`,
+			type: 'photo',
+			width: 1920,
+			height: 1080,
+			taken_at: new Date().toISOString(),
+			child_name: 'Amelia'
+		};
+
+		window.KinGallery.currentMediaList = mediaList.length > 0 ? mediaList : [mockMedia];
+		window.KinGallery.currentMediaIndex = window.KinGallery.currentMediaList.findIndex(m => m.id === mediaId);
+		window.KinGallery.mediaViewerActive = true;
+		window.KinGallery.slideshowActive = isSlideshow;
+
+		// Create and show media viewer component
+		const viewerHTML = createMediaViewerHTML(mockMedia, isSlideshow);
+		document.body.insertAdjacentHTML('beforeend', viewerHTML);
+
+		// Initialize viewer scripts
+		if (isSlideshow) {
+			startSlideshowTimer();
+		}
+	};
+
+	window.openSlideshowMode = function(mediaList = []) {
+		console.log('Starting slideshow mode with', mediaList.length, 'items');
+		
+		if (mediaList.length === 0) {
+			// Use current page's media or fetch from API
+			// For now, use mock data
+			mediaList = [
+				{ id: 1, filename: 'photo1.jpg', type: 'photo' },
+				{ id: 2, filename: 'video1.mp4', type: 'video' },
+				{ id: 3, filename: 'photo2.jpg', type: 'photo' }
+			];
+		}
+
+		openMediaViewer(mediaList[0].id, mediaList, true);
+	};
+
+	window.startAirPlaySlideshow = function() {
+		console.log('Starting AirPlay slideshow from global function');
+		
+		// Show AirPlay picker
+		const pickerHTML = createAirPlayPickerHTML();
+		document.body.insertAdjacentHTML('beforeend', pickerHTML);
+	};
+
+	// Comment Functions
+	window.postComment = async function(mediaId, commentText) {
+		if (!commentText?.trim()) return;
+		
+		try {
+			const response = await fetch('/api/comments', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					media_id: mediaId,
+					body: commentText.trim()
+				})
+			});
+
+			if (response.ok) {
+				const newComment = await response.json();
+				console.log('Comment posted:', newComment);
+				
+				// Refresh comments in UI
+				refreshComments(mediaId);
+				
+				// Clear comment input
+				const textarea = document.getElementById('new-comment');
+				if (textarea) {
+					textarea.value = '';
+				}
+			} else {
+				const error = await response.text();
+				console.error('Failed to post comment:', error);
+				alert('Failed to post comment. Please try again.');
+			}
+		} catch (error) {
+			console.error('Error posting comment:', error);
+			alert('Network error. Please check your connection.');
+		}
+	};
+
+	window.refreshComments = async function(mediaId) {
+		try {
+			const response = await fetch(`/api/comments?media_id=${mediaId}`);
+			if (response.ok) {
+				const comments = await response.json();
+				updateCommentsUI(comments);
+			}
+		} catch (error) {
+			console.error('Error refreshing comments:', error);
+		}
+	};
+
+	// Reaction Functions
+	window.toggleReaction = async function(mediaId) {
+		try {
+			const response = await fetch('/api/reactions', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({
+					media_id: mediaId,
+					type: 'heart'
+				})
+			});
+
+			if (response.ok) {
+				const result = await response.json();
+				console.log('Reaction toggled:', result);
+				
+				// Update UI to reflect new reaction state
+				updateReactionUI(mediaId, result);
+			} else {
+				console.error('Failed to toggle reaction');
+			}
+		} catch (error) {
+			console.error('Error toggling reaction:', error);
+		}
+	};
+
+	// UI Helper Functions
+	function createMediaViewerHTML(media, isSlideshow) {
+		return `
+			<div id="media-viewer" class="fixed inset-0 bg-black z-50 flex flex-col" ${isSlideshow ? 'data-slideshow="true"' : ''}>
+				<!-- Media viewer content would be generated here -->
+				<div class="flex items-center justify-center flex-1 text-white">
+					<div class="text-center">
+						<h2 class="text-2xl mb-4">Media Viewer</h2>
+						<p>Media ID: ${media.id}</p>
+						<p>Type: ${media.type}</p>
+						${isSlideshow ? '<p>Slideshow Mode Active</p>' : ''}
+						<button onclick="closeMediaViewer()" class="mt-4 px-4 py-2 bg-white text-black rounded">Close</button>
+					</div>
+				</div>
+			</div>
+		`;
+	}
+
+	function createAirPlayPickerHTML() {
+		return `
+			<div id="airplay-picker" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+				<div class="bg-white rounded-lg p-6 max-w-md mx-4">
+					<h3 class="text-lg font-semibold mb-4">AirPlay Devices</h3>
+					<div class="space-y-2 mb-4">
+						<button onclick="connectToAirPlayDevice('living-room-tv')" class="w-full text-left p-3 hover:bg-gray-50 rounded">
+							Living Room TV
+						</button>
+						<button onclick="connectToAirPlayDevice('bedroom-tv')" class="w-full text-left p-3 hover:bg-gray-50 rounded">
+							Bedroom TV
+						</button>
+					</div>
+					<button onclick="closeAirPlayPicker()" class="w-full py-2 bg-gray-200 rounded">Cancel</button>
+				</div>
+			</div>
+		`;
+	}
+
+	function updateCommentsUI(comments) {
+		// TODO: Update comments section in media viewer
+		console.log('Updating comments UI with:', comments);
+	}
+
+	function updateReactionUI(mediaId, reactionData) {
+		// TODO: Update reaction button and count
+		console.log('Updating reaction UI for media', mediaId, ':', reactionData);
+	}
+</script>

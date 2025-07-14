@@ -1,7 +1,7 @@
 import Database from 'better-sqlite3';
 import { z } from 'zod';
 
-const DATABASE_PATH = process.env.DATABASE_PATH || './data/kin-gallery.db';
+const DATABASE_PATH = process.env['DATABASE_PATH'] || './data/kin-gallery.db';
 
 export const db = new Database(DATABASE_PATH);
 

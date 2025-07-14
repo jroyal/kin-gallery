@@ -223,7 +223,7 @@ async function queueRequestForLater(request: Request): Promise<void> {
     url: request.url,
     method: request.method,
     headers: Object.fromEntries(request.headers.entries()),
-    body: request.method !== 'GET' ? await request.text() : undefined,
+    ...(request.method !== 'GET' && { body: await request.text() }),
     timestamp: Date.now()
   };
   
@@ -296,7 +296,11 @@ async function processQueuedRequests(): Promise<void> {
     const db = await openOfflineDatabase();
     const transaction = db.transaction(['requests'], 'readwrite');
     const store = transaction.objectStore('requests');
-    const requests = await store.getAll();
+    const getAllRequest = store.getAll();
+    const requests = await new Promise<QueuedRequest[]>((resolve, reject) => {
+      getAllRequest.onsuccess = () => resolve(getAllRequest.result);
+      getAllRequest.onerror = () => reject(getAllRequest.error);
+    });
     
     for (const queuedRequest of requests) {
       try {

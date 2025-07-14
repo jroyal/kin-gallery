@@ -16,8 +16,8 @@ COPY tsconfig.json ./
 COPY astro.config.mjs ./
 COPY tailwind.config.js ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Install all dependencies (needed for build)
+RUN npm ci
 
 # Copy source code
 COPY src/ ./src/
