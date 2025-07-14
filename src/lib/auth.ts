@@ -249,3 +249,27 @@ export function getUserCount(): number {
   
   return result.count;
 }
+
+/**
+ * Create appropriate headers for server-side API calls in development and production
+ */
+export function createServerSideHeaders(request: Request, simulateUser?: string): HeadersInit {
+  const headers: HeadersInit = {};
+  
+  if (DEVELOPMENT_MODE) {
+    // In development, simulate the Cloudflare Access JWT
+    const devEmail = simulateUser || 
+                    new URL(request.url).searchParams.get('simulate_user') || 
+                    'dev@example.com';
+    const devJWT = createDevelopmentJWT(devEmail);
+    headers[CF_ACCESS_JWT_HEADER] = devJWT;
+  } else {
+    // In production, pass through the actual JWT from the request
+    const jwt = request.headers.get(CF_ACCESS_JWT_HEADER);
+    if (jwt) {
+      headers[CF_ACCESS_JWT_HEADER] = jwt;
+    }
+  }
+  
+  return headers;
+}

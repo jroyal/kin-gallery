@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import AlbumsGrid from '../components/AlbumsGrid.astro';
 import { runMigrations } from '../lib/db.js';
-import { authenticateFromContext, isOnboardingRequired } from '../lib/auth.js';
+import { authenticateFromContext, isOnboardingRequired, createServerSideHeaders } from '../lib/auth.js';
 
 // Initialize database on first load
 runMigrations();
@@ -15,14 +15,85 @@ if (user && isOnboardingRequired()) {
   return Astro.redirect('/onboarding');
 }
 
-// TODO: Fetch real data from API
-// const mediaResponse = await fetch(`${Astro.url.origin}/api/media`);
-// const mediaData = await mediaResponse.json();
+// Fetch real media data from API
+let mediaData = null;
+let childrenData = null;
+if (user) {
+  try {
+    const headers = createServerSideHeaders(Astro.request);
+    
+    // Fetch recent media for hero photo and grid
+    const mediaResponse = await fetch(`${Astro.url.origin}/api/media?limit=10`, { headers });
+    if (mediaResponse.ok) {
+      mediaData = await mediaResponse.json();
+    }
+    
+    // Fetch children data for child info
+    const childrenResponse = await fetch(`${Astro.url.origin}/api/children`, { headers });
+    if (childrenResponse.ok) {
+      childrenData = await childrenResponse.json();
+    }
+  } catch (error) {
+    console.error('Failed to fetch data:', error);
+  }
+}
+
+// Process data for AlbumsGrid
+const recentMedia = mediaData?.media || [];
+const children = childrenData?.children || [];
+
+// Create hero media (most recent photo)
+const heroMedia = recentMedia.length > 0 ? recentMedia[0] : null;
+
+// Create child info (first child or most represented in recent media)
+let childInfo = null;
+if (heroMedia && children.length > 0) {
+  const heroChild = children.find(c => c.id === heroMedia.child_id);
+  if (heroChild) {
+    const age = heroChild.birthdate ? calculateAge(heroChild.birthdate) : null;
+    childInfo = {
+      name: heroChild.name,
+      age: age
+    };
+  }
+}
+
+// Helper function for age calculation
+function calculateAge(birthdate: string): string {
+  const birth = new Date(birthdate);
+  const today = new Date();
+  const ageMs = today.getTime() - birth.getTime();
+  const ageYears = Math.floor(ageMs / (1000 * 60 * 60 * 24 * 365.25));
+  const ageMonths = Math.floor((ageMs % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24 * 30.44));
+  
+  if (ageYears > 0) {
+    return ageMonths > 0 ? `${ageYears} yr ${ageMonths} mos` : `${ageYears} yr`;
+  } else {
+    return `${ageMonths} mos`;
+  }
+}
 ---
 
 <Layout title="KinGallery - Family Photos">
 	{user ? (
-		<AlbumsGrid />
+		<div>
+			<!-- Debug info (temporary) -->
+			{process.env.NODE_ENV !== 'production' && (
+				<div class="p-4 bg-blue-50 border border-blue-200 rounded m-4">
+					<h3 class="font-bold text-blue-800">Debug Info:</h3>
+					<p class="text-blue-700">Total media: {mediaData?.pagination?.total || 0}</p>
+					<p class="text-blue-700">Recent media count: {recentMedia.length}</p>
+					<p class="text-blue-700">Hero media: {heroMedia ? heroMedia.filename : 'None'}</p>
+					<p class="text-blue-700">Child info: {childInfo ? childInfo.name : 'None'}</p>
+				</div>
+			)}
+			<AlbumsGrid 
+				heroMedia={heroMedia}
+				childInfo={childInfo}
+				recentMedia={recentMedia.slice(1)}
+				mediaCount={mediaData?.pagination?.total || 0}
+			/>
+		</div>
 	) : (
 		<!-- Development/Authentication Status Page -->
 		<div class="min-h-screen bg-parchment">

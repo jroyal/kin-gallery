@@ -29,9 +29,18 @@ const {
 // Generate the appropriate image URL based on size
 const getImageUrl = (filename: string, size: string) => {
 	if (size === 'hero' || size === 'medium') {
-		return `/media/${filename.replace(/\.[^/.]+$/, '')}_${size}.jpg`;
+		// For medium/hero, use the medium variant in the same directory
+		const path = filename.split('/');
+		const file = path.pop() || '';
+		const dir = path.join('/');
+		return `/media/${dir}/medium/${file}`;
+	} else {
+		// For thumbs, use the thumbs subdirectory
+		const path = filename.split('/');
+		const file = path.pop() || '';
+		const dir = path.join('/');
+		return `/media/${dir}/thumbs/${file}`;
 	}
-	return `/media/thumbs/${filename}`;
 };
 
 const imageUrl = getImageUrl(media.filename, size);
