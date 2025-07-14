@@ -1,10 +1,8 @@
 ---
 import HeroPhoto from './HeroPhoto.astro';
 import MediaCard from './MediaCard.astro';
-import TimelineNavigation from './TimelineNavigation.astro';
 
 export interface Props {
-	currentMonth?: string;
 	heroMedia?: any;
 	childInfo?: {
 		name: string;
@@ -15,7 +13,6 @@ export interface Props {
 }
 
 const { 
-	currentMonth = new Date().toISOString().slice(0, 7),
 	heroMedia,
 	childInfo,
 	recentMedia = [],
@@ -30,8 +27,6 @@ const displayRecentMedia = recentMedia || [];
 ---
 
 <div class="min-h-screen bg-parchment">
-	<!-- Timeline Navigation -->
-	<TimelineNavigation currentMonth={currentMonth} />
 	
 	<!-- Main Content -->
 	<div class="px-4 py-6 space-y-6">

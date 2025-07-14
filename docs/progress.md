@@ -157,6 +157,7 @@
 - ✅ [2025-07-14T22:11:00Z] Removed all mock data from AlbumsGrid component (Amelia, fake hero photo, mock recent media)
 - ✅ [2025-07-14T22:18:00Z] Removed all mock data from RecentsFeed component (family comments, fake media filenames)
 - ✅ [2025-07-14T22:25:00Z] Removed all mock data from MediaGrid component and added proper empty state with upload link
+- ✅ [2025-07-14T22:30:00Z] Removed TimelineNavigation component (months banner and "Jump to Year") from top of pages
 - ⏳ Pending: Remove mock data from ActivityIndicators component
 - ⏳ Pending: Remove mock data from MediaViewer component
 

@@ -15,18 +15,14 @@ if (user && isOnboardingRequired()) {
   return Astro.redirect('/onboarding');
 }
 
-// Get current month from query params
-const url = new URL(Astro.request.url);
-const currentMonth = url.searchParams.get('month') || new Date().toISOString().slice(0, 7);
-
 // TODO: Fetch real data from API
-// const mediaResponse = await fetch(`${Astro.url.origin}/api/media?month=${currentMonth}`);
+// const mediaResponse = await fetch(`${Astro.url.origin}/api/media`);
 // const mediaData = await mediaResponse.json();
 ---
 
 <Layout title="KinGallery - Family Photos">
 	{user ? (
-		<AlbumsGrid currentMonth={currentMonth} />
+		<AlbumsGrid />
 	) : (
 		<!-- Development/Authentication Status Page -->
 		<div class="min-h-screen bg-parchment">
