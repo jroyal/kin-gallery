@@ -1,52 +1,63 @@
-# Astro Starter Kit: Basics
+# KinGallery
 
-```sh
-npm create astro@latest -- --template basics
-```
+> ⚠️ **Work in Progress** - This project is currently in early development.
 
-[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
-[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+A self-hosted Progressive Web App for sharing family photos and videos. Built with privacy and family sharing in mind.
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Overview
 
-![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
+KinGallery is a private, invite-only media sharing platform designed for families. It focuses on creating a safe environment where families can share precious memories without worrying about privacy or data ownership.
 
-## 🚀 Project Structure
+### Key Features (Planned)
 
-Inside of your Astro project, you'll see the following folders and files:
+- 📱 **Progressive Web App** - Install on iOS/Android devices
+- 🔒 **Privacy First** - Self-hosted with Cloudflare Access authentication
+- 📸 **Smart Organization** - Auto-group photos by date and child
+- ❤️ **Simple Interactions** - Comments and heart reactions
+- 📺 **AirPlay Support** - Cast slideshows to TV
+- 🌍 **Offline Ready** - Works without internet connection
+- 🎨 **Earth-tone Design** - Calming green color palette
+
+### Tech Stack
+
+- **Frontend**: Astro + TailwindCSS
+- **Backend**: Astro API routes with Node.js
+- **Database**: SQLite
+- **Storage**: Local filesystem
+- **Authentication**: Cloudflare Access
+- **Language**: TypeScript (strict mode)
+
+## Project Structure
 
 ```text
 /
-├── public/
-│   └── favicon.svg
-├── src
-│   ├── assets
-│   │   └── astro.svg
-│   ├── components
-│   │   └── Welcome.astro
-│   ├── layouts
-│   │   └── Layout.astro
-│   └── pages
-│       └── index.astro
+├── docs/                    # Project documentation and PRD
+├── public/                  # Static assets
+├── src/
+│   ├── components/          # Astro components
+│   ├── layouts/            # Page layouts
+│   ├── pages/              # Pages and API routes
+│   └── assets/             # Images, fonts, etc.
 └── package.json
 ```
 
-To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+## Development
 
-## 🧞 Commands
+### Available Commands
 
-All commands are run from the root of the project, from a terminal:
+All commands are run from the root directory:
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+| Command           | Action                                     |
+| ----------------- | ------------------------------------------ |
+| `npm install`     | Install dependencies                       |
+| `npm run dev`     | Start development server at localhost:4321 |
+| `npm run build`   | Build production site to ./dist/           |
+| `npm run preview` | Preview production build locally           |
+| `npm t`           | Run unit tests                             |
+| `npm run astro`   | Run Astro CLI commands                     |
 
-## 👀 Want to learn more?
+## Documentation
 
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+See the [comprehensive PRD](docs/kin_gallery_prd_v_0_4.md) for detailed requirements, architecture, and implementation plans.
+
+> **Note**: This is a personal project shared for reference. Use at your own risk with no support or SLA.
