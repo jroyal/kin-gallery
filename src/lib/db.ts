@@ -13,6 +13,7 @@ db.pragma('foreign_keys = ON');
 export const UserSchema = z.object({
   id: z.number(),
   email: z.string().email(),
+  name: z.string().nullable(),
   role: z.enum(['admin', 'user']),
   created_at: z.string(),
   deleted_at: z.string().nullable()
@@ -166,6 +167,14 @@ const MIGRATIONS = [
 
         CREATE INDEX idx_reactions_media_id ON reactions(media_id);
         CREATE INDEX idx_reactions_user_id ON reactions(user_id);
+      `);
+    }
+  },
+  {
+    version: 6,
+    up: () => {
+      db.exec(`
+        ALTER TABLE users ADD COLUMN name TEXT NULL;
       `);
     }
   }

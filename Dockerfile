@@ -22,6 +22,7 @@ RUN npm ci
 # Copy source code
 COPY src/ ./src/
 COPY public/ ./public/
+COPY scripts/ ./scripts/
 
 # Build the application
 RUN npm run build
@@ -32,5 +33,10 @@ EXPOSE 4321
 # Create data and media directories
 RUN mkdir -p /app/data /app/media
 
+# Copy startup script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Start the application
+ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["node", "./dist/server/entry.mjs"]

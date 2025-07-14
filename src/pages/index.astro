@@ -2,13 +2,18 @@
 import Layout from '../layouts/Layout.astro';
 import AlbumsGrid from '../components/AlbumsGrid.astro';
 import { runMigrations } from '../lib/db.js';
-import { authenticateFromContext } from '../lib/auth.js';
+import { authenticateFromContext, isOnboardingRequired } from '../lib/auth.js';
 
 // Initialize database on first load
 runMigrations();
 
 // Get current user for development
 const user = authenticateFromContext(Astro);
+
+// Check if onboarding is required
+if (user && isOnboardingRequired()) {
+  return Astro.redirect('/onboarding');
+}
 
 // Get current month from query params
 const url = new URL(Astro.request.url);

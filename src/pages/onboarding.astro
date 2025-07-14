@@ -1,0 +1,296 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { authenticateFromContext, isOnboardingRequired } from '../lib/auth.js';
+
+// Check authentication
+const user = authenticateFromContext(Astro);
+if (!user) {
+  return Astro.redirect('/');
+}
+
+// Check if onboarding is actually needed
+if (!isOnboardingRequired()) {
+  return Astro.redirect('/');
+}
+---
+
+<Layout title="Welcome to KinGallery">
+  <div class="min-h-screen bg-parchment">
+    <div class="container mx-auto px-4 py-8">
+      <!-- Header -->
+      <header class="text-center mb-8">
+        <h1 class="text-4xl font-heading font-bold text-forest mb-2">
+          Welcome to KinGallery
+        </h1>
+        <p class="text-moss text-lg">
+          Let's set up your family photo gallery
+        </p>
+      </header>
+
+      <!-- Onboarding Form -->
+      <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-6">
+        <div class="mb-6">
+          <h2 class="text-2xl font-heading font-semibold text-forest mb-2">
+            Hello, {user.email}!
+          </h2>
+          <p class="text-moss">
+            You're the first user, so you've been automatically made an admin. 
+            Let's add your first child to get started.
+          </p>
+        </div>
+
+        <form id="onboarding-form" class="space-y-6">
+          <!-- User Info Section -->
+          <div class="border-b border-sage pb-6">
+            <h3 class="text-lg font-semibold text-forest mb-4">Your Profile</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label for="user-name" class="block text-sm font-medium text-forest mb-1">
+                  Display Name
+                </label>
+                <input
+                  type="text"
+                  id="user-name"
+                  name="user[name]"
+                  placeholder="Enter your display name"
+                  class="w-full px-3 py-2 border border-sage rounded-md focus:ring-2 focus:ring-forest focus:border-transparent"
+                />
+                <p class="text-xs text-moss mt-1">
+                  This will be shown when you comment on photos
+                </p>
+              </div>
+              <div>
+                <label for="email" class="block text-sm font-medium text-forest mb-1">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  value={user.email}
+                  disabled
+                  class="w-full px-3 py-2 border border-sage rounded-md bg-gray-50 text-gray-500"
+                />
+                <p class="text-xs text-moss mt-1">
+                  This email is provided by your authentication system
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Children Section -->
+          <div>
+            <h3 class="text-lg font-semibold text-forest mb-4">Add Your First Child</h3>
+            <div id="children-container">
+              <div class="child-entry bg-moss/5 rounded-lg p-4 mb-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-forest mb-1">
+                      Child's Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="children[0][name]"
+                      required
+                      placeholder="e.g., Emma"
+                      class="w-full px-3 py-2 border border-sage rounded-md focus:ring-2 focus:ring-forest focus:border-transparent"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-forest mb-1">
+                      Birthday (Optional)
+                    </label>
+                    <input
+                      type="date"
+                      name="children[0][birthdate]"
+                      class="w-full px-3 py-2 border border-sage rounded-md focus:ring-2 focus:ring-forest focus:border-transparent"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Add Another Child Button -->
+            <button
+              type="button"
+              id="add-child"
+              class="text-forest hover:text-moss border border-forest hover:border-moss rounded-md px-4 py-2 text-sm font-medium transition-colors"
+            >
+              + Add Another Child
+            </button>
+          </div>
+
+          <!-- Submit Section -->
+          <div class="border-t border-sage pt-6">
+            <div class="flex items-center justify-between">
+              <p class="text-sm text-moss">
+                You can always add more children later from the settings page.
+              </p>
+              <button
+                type="submit"
+                id="submit-btn"
+                class="bg-forest text-white px-6 py-2 rounded-md hover:bg-moss transition-colors font-medium"
+              >
+                Complete Setup
+              </button>
+            </div>
+          </div>
+
+          <!-- Loading State -->
+          <div id="loading" class="hidden text-center py-4">
+            <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-forest"></div>
+            <p class="text-moss mt-2">Setting up your gallery...</p>
+          </div>
+
+          <!-- Error State -->
+          <div id="error" class="hidden bg-red-50 border border-red-200 rounded-md p-4">
+            <p class="text-red-800" id="error-message"></p>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let childCount = 1;
+
+    // Add child functionality
+    document.getElementById('add-child')?.addEventListener('click', () => {
+      if (childCount >= 5) return; // Limit to 5 children
+
+      const container = document.getElementById('children-container');
+      const childEntry = document.createElement('div');
+      childEntry.className = 'child-entry bg-moss/5 rounded-lg p-4 mb-4';
+      childEntry.innerHTML = `
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-forest mb-1">
+              Child's Name *
+            </label>
+            <input
+              type="text"
+              name="children[${childCount}][name]"
+              required
+              placeholder="e.g., Emma"
+              class="w-full px-3 py-2 border border-sage rounded-md focus:ring-2 focus:ring-forest focus:border-transparent"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-forest mb-1">
+              Birthday (Optional)
+            </label>
+            <input
+              type="date"
+              name="children[${childCount}][birthdate]"
+              class="w-full px-3 py-2 border border-sage rounded-md focus:ring-2 focus:ring-forest focus:border-transparent"
+            />
+          </div>
+        </div>
+        <div class="mt-3 text-right">
+          <button
+            type="button"
+            class="text-red-600 hover:text-red-800 text-sm font-medium"
+            onclick="this.closest('.child-entry').remove(); updateChildCount();"
+          >
+            Remove
+          </button>
+        </div>
+      `;
+
+      container?.appendChild(childEntry);
+      childCount++;
+
+      // Hide add button if at limit
+      if (childCount >= 5) {
+        const addButton = document.getElementById('add-child');
+        if (addButton) addButton.style.display = 'none';
+      }
+    });
+
+    // Update child count when removing entries
+    function updateChildCount() {
+      const entries = document.querySelectorAll('.child-entry');
+      childCount = entries.length;
+      
+      // Show add button if under limit
+      if (childCount < 5) {
+        const addButton = document.getElementById('add-child');
+        if (addButton) addButton.style.display = 'block';
+      }
+    }
+
+    // Form submission
+    document.getElementById('onboarding-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const formData = new FormData(e.target as HTMLFormElement);
+      const loadingEl = document.getElementById('loading');
+      const errorEl = document.getElementById('error');
+      const submitBtn = document.getElementById('submit-btn');
+
+      // Show loading state
+      if (loadingEl) loadingEl.classList.remove('hidden');
+      if (errorEl) errorEl.classList.add('hidden');
+      if (submitBtn) submitBtn.disabled = true;
+
+      try {
+        // Extract user data
+        const userNameInput = document.querySelector('input[name="user[name]"]') as HTMLInputElement;
+        const userData = userNameInput?.value.trim() ? {
+          name: userNameInput.value.trim()
+        } : undefined;
+
+        // Extract children data
+        const children = [];
+        const entries = document.querySelectorAll('.child-entry');
+        
+        for (let i = 0; i < entries.length; i++) {
+          const nameInput = entries[i].querySelector(`input[name="children[${i}][name]"]`) as HTMLInputElement;
+          const birthdateInput = entries[i].querySelector(`input[name="children[${i}][birthdate]"]`) as HTMLInputElement;
+          
+          if (nameInput?.value.trim()) {
+            children.push({
+              name: nameInput.value.trim(),
+              birthdate: birthdateInput?.value || undefined
+            });
+          }
+        }
+
+        if (children.length === 0) {
+          throw new Error('Please add at least one child');
+        }
+
+        const response = await fetch('/api/onboarding', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            user: userData,
+            children
+          })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Failed to complete onboarding');
+        }
+
+        // Success! Redirect to main app
+        window.location.href = '/';
+        
+      } catch (error) {
+        // Show error
+        if (errorEl && error instanceof Error) {
+          errorEl.classList.remove('hidden');
+          const messageEl = document.getElementById('error-message');
+          if (messageEl) messageEl.textContent = error.message;
+        }
+      } finally {
+        // Hide loading state
+        if (loadingEl) loadingEl.classList.add('hidden');
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+  </script>
+</Layout>

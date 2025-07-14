@@ -76,7 +76,7 @@ export function getOrCreateUser(email: string): User {
 
   const role = userCount.count === 0 ? 'admin' : 'user';
 
-  // Create new user
+  // Create new user (name will be null initially, can be set during onboarding)
   const result = db.prepare(`
     INSERT INTO users (email, role)
     VALUES (?, ?)
@@ -199,6 +199,16 @@ export function updateUserRole(userId: number, role: 'admin' | 'user'): boolean 
   return result.changes > 0;
 }
 
+export function updateUserName(userId: number, name: string): boolean {
+  runMigrations();
+  const result = db.prepare(`
+    UPDATE users 
+    SET name = ? 
+    WHERE id = ? AND deleted_at IS NULL
+  `).run(name, userId);
+  return result.changes > 0;
+}
+
 export function getAllUsers(): User[] {
   const queries = getUserQueries();
   const users = queries.list.all() as User[];
@@ -215,4 +225,27 @@ export function deleteUser(userId: number): boolean {
   const queries = getUserQueries();
   const result = queries.softDelete.run(userId);
   return result.changes > 0;
+}
+
+export function isOnboardingRequired(): boolean {
+  // Ensure database is initialized
+  runMigrations();
+  
+  // Check if there are any children in the database
+  const childCount = db.prepare(`
+    SELECT COUNT(*) as count FROM children WHERE deleted_at IS NULL
+  `).get() as { count: number };
+  
+  return childCount.count === 0;
+}
+
+export function getUserCount(): number {
+  // Ensure database is initialized
+  runMigrations();
+  
+  const result = db.prepare(`
+    SELECT COUNT(*) as count FROM users WHERE deleted_at IS NULL
+  `).get() as { count: number };
+  
+  return result.count;
 }
