@@ -10,53 +10,8 @@ export interface Props {
 
 const { recentComments = [], activities = [] } = Astro.props;
 
-// Family comments focused on child-centric content
-const mockComments = recentComments.length > 0 ? recentComments : [
-	{
-		id: 1,
-		user_name: 'Mom',
-		body: 'Look at those big smiles! ❤️',
-		timeAgo: '2 days ago',
-		media: {
-			id: 1,
-			filename: 'playground-fun.jpg',
-			type: 'photo'
-		}
-	},
-	{
-		id: 2,
-		user_name: 'Grandma', 
-		body: 'Amelia is getting so big! Can\'t wait to see her next week.',
-		timeAgo: '3 days ago',
-		media: {
-			id: 2,
-			filename: 'amelia-growing.jpg',
-			type: 'photo'
-		}
-	},
-	{
-		id: 3,
-		user_name: 'Dad',
-		body: 'First time on the swings - she loved it!',
-		timeAgo: '4 days ago',
-		media: {
-			id: 3,
-			filename: 'first-swings.jpg',
-			type: 'video'
-		}
-	},
-	{
-		id: 4,
-		user_name: 'Aunt Sarah',
-		body: 'Those little hands! 🥰 Sending hugs from California.',
-		timeAgo: '1 week ago',
-		media: {
-			id: 4,
-			filename: 'tiny-hands.jpg',
-			type: 'photo'
-		}
-	}
-];
+// Use real comments data or empty array for clean slate
+const displayComments = recentComments || [];
 ---
 
 <div class="min-h-screen bg-parchment">
@@ -74,7 +29,9 @@ const mockComments = recentComments.length > 0 ? recentComments : [
 				</div>
 				<div>
 					<h3 class="font-semibold text-gray-900">Family Activity</h3>
-					<p class="text-sm text-gray-600">5 new comments this week</p>
+					<p class="text-sm text-gray-600">
+				{displayComments.length > 0 ? `${displayComments.length} recent comments` : 'No recent activity'}
+			</p>
 				</div>
 			</div>
 			<a 
@@ -92,20 +49,22 @@ const mockComments = recentComments.length > 0 ? recentComments : [
 	<!-- Recent Comments Feed -->
 	<div class="bg-white rounded-t-3xl mt-6 min-h-96">
 		<div class="pt-6">
-			{mockComments.map((comment) => (
-				<CommentCard comment={comment} showMediaThumbnail={true} />
+			{displayComments.map((comment) => (
+				<CommentCard comment={comment} showMediaThumbnail={true} key={comment.id} />
 			))}
 		</div>
 
 		<!-- Load More -->
-		<div class="p-4 text-center">
-			<button class="text-forest font-medium hover:text-forest/80 transition-colors">
-				Load More Activity
-			</button>
-		</div>
+		{displayComments.length > 0 && (
+			<div class="p-4 text-center">
+				<button class="text-forest font-medium hover:text-forest/80 transition-colors">
+					Load More Activity
+				</button>
+			</div>
+		)}
 
 		<!-- Empty State (if no comments) -->
-		{mockComments.length === 0 && (
+		{displayComments.length === 0 && (
 			<div class="text-center py-12 px-4">
 				<div class="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
 					<svg class="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 24 24">

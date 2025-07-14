@@ -22,72 +22,11 @@ const {
 	mediaCount = 0
 } = Astro.props;
 
-// Mock data for demonstration
-const mockHeroMedia = heroMedia || {
-	id: 1,
-	filename: 'hero-photo.jpg',
-	type: 'photo',
-	width: 1200,
-	height: 900,
-	taken_at: '2025-07-10T14:30:00Z',
-	child_name: 'Amelia'
-};
+// Use real data or empty values for clean slate
+const displayHeroMedia = heroMedia;
+const displayChildInfo = childInfo;
 
-const mockChildInfo = childInfo || {
-	name: 'Amelia',
-	age: '1 yr 6 mos'
-};
-
-const mockRecentMedia = recentMedia.length > 0 ? recentMedia : [
-	{
-		id: 2,
-		filename: 'photo1.jpg',
-		type: 'photo',
-		width: 800,
-		height: 600,
-		taken_at: '2025-07-09T16:45:00Z'
-	},
-	{
-		id: 3,
-		filename: 'video1.mp4',
-		type: 'video',
-		width: 1920,
-		height: 1080,
-		taken_at: '2025-07-08T10:20:00Z'
-	},
-	{
-		id: 4,
-		filename: 'photo2.jpg',
-		type: 'photo',
-		width: 600,
-		height: 800,
-		taken_at: '2025-07-07T12:15:00Z'
-	},
-	{
-		id: 5,
-		filename: 'photo3.jpg',
-		type: 'photo',
-		width: 800,
-		height: 600,
-		taken_at: '2025-07-06T18:30:00Z'
-	},
-	{
-		id: 6,
-		filename: 'photo4.jpg',
-		type: 'photo',
-		width: 600,
-		height: 800,
-		taken_at: '2025-07-05T14:45:00Z'
-	},
-	{
-		id: 7,
-		filename: 'photo5.jpg',
-		type: 'photo',
-		width: 800,
-		height: 600,
-		taken_at: '2025-07-04T11:20:00Z'
-	}
-];
+const displayRecentMedia = recentMedia || [];
 ---
 
 <div class="min-h-screen bg-parchment">
@@ -97,20 +36,22 @@ const mockRecentMedia = recentMedia.length > 0 ? recentMedia : [
 	<!-- Main Content -->
 	<div class="px-4 py-6 space-y-6">
 		<!-- Hero Photo Section -->
-		<section>
-			<HeroPhoto 
-				media={mockHeroMedia}
-				childInfo={mockChildInfo}
-				mediaCount={mediaCount || mockRecentMedia.length + 1}
-			/>
-		</section>
+		{displayHeroMedia && displayChildInfo && (
+			<section>
+				<HeroPhoto 
+					media={displayHeroMedia}
+					childInfo={displayChildInfo}
+					mediaCount={mediaCount || displayRecentMedia.length + 1}
+				/>
+			</section>
+		)}
 
 		<!-- Recent Photos Grid -->
-		{mockRecentMedia.length > 0 && (
+		{displayRecentMedia.length > 0 && (
 			<section>
 				<div class="grid grid-cols-3 gap-1 sm:gap-2">
-					{mockRecentMedia.map((media) => (
-						<div class="aspect-square">
+					{displayRecentMedia.map((media) => (
+						<div class="aspect-square" key={media.id}>
 							<MediaCard 
 								media={media}
 								size="thumb"
@@ -125,7 +66,7 @@ const mockRecentMedia = recentMedia.length > 0 ? recentMedia : [
 		)}
 
 		<!-- Empty State -->
-		{mockRecentMedia.length === 0 && !heroMedia && (
+		{displayRecentMedia.length === 0 && !displayHeroMedia && (
 			<section class="text-center py-12">
 				<div class="max-w-sm mx-auto">
 					<div class="w-24 h-24 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
@@ -184,12 +125,10 @@ const mockRecentMedia = recentMedia.length > 0 ? recentMedia : [
 					<button class="px-3 py-2 bg-forest text-white rounded-full text-sm font-medium">
 						All Children
 					</button>
-					<button class="px-3 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">
-						Amelia (1yr 6mo)
-					</button>
-					<button class="px-3 py-2 bg-gray-100 text-gray-700 rounded-full text-sm font-medium hover:bg-gray-200 transition-colors">
-						Family Photos
-					</button>
+					<!-- TODO: Dynamically populate children from API -->
+					<div class="text-sm text-gray-500 py-2">
+						Add children through onboarding to see filter options
+					</div>
 				</div>
 			</div>
 		</section>

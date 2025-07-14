@@ -5,6 +5,39 @@ import { authenticateFromContext } from '../lib/auth.js';
 
 // Get current user
 const user = authenticateFromContext(Astro);
+
+// Helper function to calculate age
+function calculateAge(birthdate: string): string {
+  const birth = new Date(birthdate);
+  const today = new Date();
+  const ageMs = today.getTime() - birth.getTime();
+  const ageYears = Math.floor(ageMs / (1000 * 60 * 60 * 24 * 365.25));
+  const ageMonths = Math.floor((ageMs % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24 * 30.44));
+  
+  if (ageYears > 0) {
+    return ageMonths > 0 ? `${ageYears} yr ${ageMonths} mos` : `${ageYears} yr`;
+  } else {
+    return `${ageMonths} mos`;
+  }
+}
+
+// Fetch children data if user is authenticated
+let children = [];
+if (user) {
+  try {
+    const childrenResponse = await fetch(`${Astro.url.origin}/api/children`, {
+      headers: {
+        'CF-Access-Jwt-Assertion': Astro.request.headers.get('CF-Access-Jwt-Assertion') || ''
+      }
+    });
+    if (childrenResponse.ok) {
+      const childrenData = await childrenResponse.json();
+      children = childrenData.children || [];
+    }
+  } catch (error) {
+    console.error('Failed to fetch children:', error);
+  }
+}
 ---
 
 <Layout title="Upload - KinGallery">
@@ -66,19 +99,43 @@ const user = authenticateFromContext(Astro);
 				</div>
 
 				<!-- Child Selection -->
-				<div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
-					<h4 class="font-medium text-gray-900 mb-3">Select Child</h4>
-					<div class="space-y-2">
-						<label class="flex items-center">
-							<input type="radio" name="child" value="1" class="text-forest focus:ring-forest" checked />
-							<span class="ml-3 text-gray-700">Amelia (1 yr 6 mos)</span>
-						</label>
-						<label class="flex items-center">
-							<input type="radio" name="child" value="2" class="text-forest focus:ring-forest" />
-							<span class="ml-3 text-gray-700">Family Photos</span>
-						</label>
+				{children.length > 0 ? (
+					<div class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+						<h4 class="font-medium text-gray-900 mb-3">Select Child</h4>
+						<div class="space-y-2">
+							{children.map((child, index) => {
+								const age = child.birthdate ? calculateAge(child.birthdate) : null;
+								return (
+									<label class="flex items-center" key={child.id}>
+										<input 
+											type="radio" 
+											name="child" 
+											value={child.id} 
+											class="text-forest focus:ring-forest" 
+											checked={index === 0}
+										/>
+										<span class="ml-3 text-gray-700">
+											{child.name}{age ? ` (${age})` : ''}
+										</span>
+									</label>
+								);
+							})}
+						</div>
 					</div>
-				</div>
+				) : (
+					<div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+						<h4 class="font-medium text-yellow-800 mb-2">No Children Added</h4>
+						<p class="text-yellow-700 text-sm mb-3">
+							You need to add at least one child before uploading photos.
+						</p>
+						<a 
+							href="/onboarding"
+							class="inline-flex items-center px-4 py-2 bg-yellow-600 text-white text-sm font-medium rounded-md hover:bg-yellow-700 transition-colors"
+						>
+							Add Children
+						</a>
+					</div>
+				)}
 
 				<!-- Upload Progress (hidden by default) -->
 				<div id="uploadProgress" class="mt-6 bg-white rounded-lg shadow-sm border border-gray-200 p-4 hidden">

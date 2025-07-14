@@ -145,9 +145,38 @@
 - 🔄 **Browser Testing**: Pending `npx playwright install` for E2E browser tests
 - 🔄 **Lighthouse Performance**: Pending PWA performance budget configuration
 
+## TASK 6 — Mock Data Removal & Clean Slate Experience 🛠️ [2025-07-14T22:15:00Z]
+
+### Phase 1: Onboarding Flow Improvements ✅ [2025-07-14T22:10:00Z]
+- ✅ [2025-07-14T22:05:00Z] Changed onboarding completion redirect from main page to upload page
+- ✅ [2025-07-14T22:08:00Z] Updated upload page to fetch real children data from `/api/children` endpoint
+- ✅ [2025-07-14T22:09:00Z] Added age calculation helper function for displaying child ages (e.g., "2 yr 3 mos")
+- ✅ [2025-07-14T22:10:00Z] Implemented empty state handling when no children exist with redirect to onboarding
+
+### Phase 2: Core Component Mock Data Removal ✅ [2025-07-14T22:25:00Z]
+- ✅ [2025-07-14T22:11:00Z] Removed all mock data from AlbumsGrid component (Amelia, fake hero photo, mock recent media)
+- ✅ [2025-07-14T22:18:00Z] Removed all mock data from RecentsFeed component (family comments, fake media filenames)
+- ✅ [2025-07-14T22:25:00Z] Removed all mock data from MediaGrid component and added proper empty state with upload link
+- ⏳ Pending: Remove mock data from ActivityIndicators component
+- ⏳ Pending: Remove mock data from MediaViewer component
+
+### Clean Slate Implementation Progress:
+- **Onboarding Redirect**: Users now go directly to upload page after adding children
+- **Real Children Data**: Upload page dynamically shows children from onboarding instead of "Amelia" mock data
+- **Age Display**: Proper age calculation shows "1 yr 6 mos" format based on real birthdates
+- **Empty State Handling**: Upload page handles case when no children exist
+- **User Experience**: Seamless flow from onboarding → upload → first media addition
+
+### Mock Data Removal Strategy:
+1. **High Priority**: AlbumsGrid, RecentsFeed, MediaGrid, ActivityIndicators, MediaViewer
+2. **Medium Priority**: TimelineNavigation component
+3. **Low Priority**: MediaCard component hardcoded values
+4. **Validation**: Ensure all components handle empty arrays gracefully
+
 ### Next Tasks:
+- Complete mock data removal from core components
 - Test clean install script execution (`npm run clean-install`)
-- Verify onboarding flow in development environment
+- Verify end-to-end onboarding → upload flow in development environment
 - Complete Docker container verification when Docker is available
 - Install Playwright browsers for full E2E testing (`npx playwright install`)
 - Configure Lighthouse performance budgets for PWA requirements

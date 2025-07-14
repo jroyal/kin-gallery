@@ -276,8 +276,8 @@ if (!isOnboardingRequired()) {
           throw new Error(result.error || 'Failed to complete onboarding');
         }
 
-        // Success! Redirect to main app
-        window.location.href = '/';
+        // Success! Redirect to upload page to add first media
+        window.location.href = '/upload';
         
       } catch (error) {
         // Show error

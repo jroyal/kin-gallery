@@ -20,85 +20,11 @@ const {
 	showBackButton = true
 } = Astro.props;
 
-// Mock data organized by date (like Image 2)
-const mockMediaByDate = Object.keys(mediaByDate).length > 0 ? mediaByDate : {
-	"Jul 13, 2025": [
-		{
-			id: 1,
-			filename: 'photo1.jpg',
-			type: 'photo',
-			width: 800,
-			height: 600,
-			taken_at: '2025-07-13T14:30:00Z'
-		},
-		{
-			id: 2,
-			filename: 'video1.mp4',
-			type: 'video',
-			width: 1920,
-			height: 1080,
-			taken_at: '2025-07-13T12:15:00Z'
-		},
-		{
-			id: 3,
-			filename: 'photo2.jpg',
-			type: 'photo',
-			width: 600,
-			height: 800,
-			taken_at: '2025-07-13T10:45:00Z'
-		},
-		{
-			id: 4,
-			filename: 'photo3.jpg',
-			type: 'photo',
-			width: 800,
-			height: 600,
-			taken_at: '2025-07-13T09:20:00Z'
-		},
-		{
-			id: 5,
-			filename: 'photo4.jpg',
-			type: 'photo',
-			width: 600,
-			height: 800,
-			taken_at: '2025-07-13T08:30:00Z'
-		}
-	],
-	"Jul 12, 2025": [
-		{
-			id: 6,
-			filename: 'photo5.jpg',
-			type: 'photo',
-			width: 800,
-			height: 600,
-			taken_at: '2025-07-12T16:45:00Z'
-		},
-		{
-			id: 7,
-			filename: 'photo6.jpg',
-			type: 'photo',
-			width: 800,
-			height: 600,
-			taken_at: '2025-07-12T15:20:00Z'
-		},
-		{
-			id: 8,
-			filename: 'photo7.jpg',
-			type: 'photo',
-			width: 600,
-			height: 800,
-			taken_at: '2025-07-12T14:10:00Z'
-		},
-		{
-			id: 9,
-			filename: 'video2.mp4',
-			type: 'video',
-			width: 1920,
-			height: 1080,
-			taken_at: '2025-07-12T13:30:00Z'
-		}
-	]
-};
+// Use real data or empty object for clean slate
+const displayMediaByDate = mediaByDate || {};
+const hasAnyMedia = Object.keys(displayMediaByDate).length > 0;
+
+// All mock data removed for clean slate
 
 const totalSelectedCount = selectedItems.length;
 ---
@@ -143,7 +69,7 @@ const totalSelectedCount = selectedItems.length;
 		)}
 
 		<!-- Media Grid by Date -->
-		{Object.entries(mockMediaByDate).map(([date, mediaItems]) => (
+		{hasAnyMedia ? Object.entries(displayMediaByDate).map(([date, mediaItems]) => (
 			<section class="mb-8">
 				{/* Date Header */}
 				{showDateHeaders && (
@@ -158,7 +84,7 @@ const totalSelectedCount = selectedItems.length;
 				{/* Grid */}
 				<div class="grid grid-cols-4 gap-0.5 px-4">
 					{mediaItems.map((media) => (
-						<div class="aspect-square">
+						<div class="aspect-square" key={media.id}>
 							<MediaCard 
 								media={media}
 								size="thumb"
@@ -175,14 +101,40 @@ const totalSelectedCount = selectedItems.length;
 					))}
 				</div>
 			</section>
-		))}
+		)) : (
+			<!-- Empty State -->
+			<div class="text-center py-16 px-4">
+				<div class="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+					<svg class="w-12 h-12 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-1 16H6l3-4 2.03 2.71L14 13l4 6z"/>
+					</svg>
+				</div>
+				<h3 class="text-xl font-heading font-semibold text-gray-900 mb-3">
+					No photos yet
+				</h3>
+				<p class="text-gray-600 mb-8 max-w-sm mx-auto">
+					Start building your family photo collection by uploading your first memories.
+				</p>
+				<a 
+					href="/upload"
+					class="inline-flex items-center px-6 py-3 bg-forest text-white font-medium rounded-lg hover:bg-forest/90 transition-colors"
+				>
+					<svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+						<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+					</svg>
+					Upload First Photos
+				</a>
+			</div>
+		)}
 
 		<!-- Load More -->
-		<div class="px-4 mt-8">
-			<button class="w-full py-3 text-forest font-medium hover:bg-gray-50 rounded-lg transition-colors">
-				Load More Photos
-			</button>
-		</div>
+		{hasAnyMedia && (
+			<div class="px-4 mt-8">
+				<button class="w-full py-3 text-forest font-medium hover:bg-gray-50 rounded-lg transition-colors">
+					Load More Photos
+				</button>
+			</div>
+		)}
 	</div>
 
 	<!-- Selection Mode Actions -->
